@@ -1,0 +1,10 @@
+node_modules
+.next
+.vercel
+*.log
+.DS_Store
+VERCEL_DEPLOYMENT.md
+FIX_VERCEL.md
+PROJECT_SUMMARY.md
+SETUP_GUIDE.md
+supabase-setup.sql

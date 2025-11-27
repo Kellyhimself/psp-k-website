@@ -9,9 +9,17 @@ export default function RegisterPage() {
     email: '',
     phone: '',
     idNumber: '',
+    dateOfBirth: '',
+    gender: '',
     county: '',
     constituency: '',
     ward: '',
+    physicalAddress: '',
+    disabilityStatus: '',
+    isKenyanCitizen: false,
+    notMemberOfOtherParty: false,
+    agreeToConstitution: false,
+    consentToDataProcessing: false,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -32,17 +40,31 @@ export default function RegisterPage() {
         email: '',
         phone: '',
         idNumber: '',
+        dateOfBirth: '',
+        gender: '',
         county: '',
         constituency: '',
         ward: '',
+        physicalAddress: '',
+        disabilityStatus: '',
+        isKenyanCitizen: false,
+        notMemberOfOtherParty: false,
+        agreeToConstitution: false,
+        consentToDataProcessing: false,
       })
     }, 1000)
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const target = e.target
+    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value
+    const name = target.name
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
   }
 
@@ -130,10 +152,60 @@ export default function RegisterPage() {
                 id="idNumber"
                 name="idNumber"
                 required
+                pattern="[0-9]{8,12}"
+                maxLength={12}
                 value={formData.idNumber}
                 onChange={handleChange}
+                placeholder="Enter your National ID number"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Required for membership verification with IEBC
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  htmlFor="dateOfBirth"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Date of Birth * (Must be 18+)
+                </label>
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  required
+                  max={new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                    .toISOString()
+                    .split('T')[0]}
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
+                  Gender *
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  required
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Required for gender balance reporting</p>
+              </div>
             </div>
 
             <div>
@@ -156,12 +228,13 @@ export default function RegisterPage() {
                 htmlFor="constituency"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Constituency
+                Constituency *
               </label>
               <input
                 type="text"
                 id="constituency"
                 name="constituency"
+                required
                 value={formData.constituency}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
@@ -170,16 +243,131 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="ward" className="block text-sm font-medium text-gray-700 mb-2">
-                Ward
+                Ward *
               </label>
               <input
                 type="text"
                 id="ward"
                 name="ward"
+                required
                 value={formData.ward}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="physicalAddress"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Physical Address
+              </label>
+              <textarea
+                id="physicalAddress"
+                name="physicalAddress"
+                rows={3}
+                value={formData.physicalAddress}
+                onChange={handleChange}
+                placeholder="Enter your physical address (optional but recommended)"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="disabilityStatus"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Disability Status (Optional)
+              </label>
+              <select
+                id="disabilityStatus"
+                name="disabilityStatus"
+                value={formData.disabilityStatus}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              >
+                <option value="">Select if applicable</option>
+                <option value="none">None</option>
+                <option value="physical">Physical Disability</option>
+                <option value="visual">Visual Impairment</option>
+                <option value="hearing">Hearing Impairment</option>
+                <option value="intellectual">Intellectual Disability</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Helps us ensure inclusivity for marginalized groups
+              </p>
+            </div>
+
+            {/* Membership Declarations */}
+            <div className="border-t border-gray-200 pt-6 space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Membership Declarations *
+              </h3>
+
+              <label className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  name="isKenyanCitizen"
+                  required
+                  checked={formData.isKenyanCitizen}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I confirm that I am a Kenyan citizen *
+                </span>
+              </label>
+
+              <label className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  name="notMemberOfOtherParty"
+                  required
+                  checked={formData.notMemberOfOtherParty}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I confirm that I am not a member of any other political party *
+                </span>
+              </label>
+
+              <label className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  name="agreeToConstitution"
+                  required
+                  checked={formData.agreeToConstitution}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I agree to abide by the PSP-K constitution and code of conduct *
+                </span>
+              </label>
+
+              <label className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  name="consentToDataProcessing"
+                  required
+                  checked={formData.consentToDataProcessing}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I consent to the processing of my personal data for party membership purposes. I
+                  have read and agree to the{' '}
+                  <a href="/privacy" className="text-purple-600 hover:underline">
+                    Privacy Policy
+                  </a>{' '}
+                  *
+                </span>
+              </label>
             </div>
 
             {submitStatus === 'success' && (

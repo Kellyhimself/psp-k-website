@@ -126,24 +126,99 @@ Namecheap is an excellent choice for domain registration. Here's how to set it u
 
 ### Email Forwarding on Namecheap (FREE):
 
-1. **In Namecheap Dashboard:**
-   - Go to Domain List → Click "Manage" next to your domain
-   - Click "Advanced DNS" tab
-   - Scroll to "Email Forwarding" section
-   - Click "Add Email Forwarding"
+#### Step 1: Navigate to Domain Management
 
-2. **Set Up Forwarding:**
-   - **Forward To**: Your personal email (Gmail, Outlook, etc.)
-   - **Forward From**: 
-     - `info@psp-k.co.ke` → your-email@gmail.com
+1. **Log in to Namecheap:**
+   - Go to [namecheap.com](https://www.namecheap.com)
+   - Click "Sign In" (top right)
+   - Enter your credentials
+
+2. **Go to Domain List:**
+   - Click your **username** (top right)
+   - Select **"Domain List"** from the dropdown menu
+   - OR go directly to: https://ap.www.namecheap.com/domains/list/
+
+3. **Find Your Domain:**
+   - You'll see a list of all your domains
+   - Find `psp-k.co.ke` (or your domain name)
+   - Click the **"Manage"** button next to it
+
+#### Step 2: Access Email Forwarding
+
+**Method 1: Direct Email Forwarding (Easiest)**
+
+1. **In the Domain Management page:**
+   - Look for tabs: **"Domain"**, **"Advanced DNS"**, **"Email Forwarding"**, etc.
+   - Click the **"Email Forwarding"** tab
+   - If you don't see this tab, try Method 2 below
+
+2. **Add Email Forwarding:**
+   - You'll see a section titled "Email Forwarding" or "Mail Settings"
+   - Click **"Add Email Forwarding"** or **"Create Email Forwarding"** button
+   - Enter:
+     - **Mailbox**: `info` (this creates info@psp-k.co.ke)
+     - **Forward To**: `your-email@gmail.com` (your personal email)
+   - Click **"Save"** or **"Add"**
+
+**Method 2: Via Advanced DNS (If Email Forwarding Tab Not Visible)**
+
+1. **Go to Advanced DNS:**
+   - Click the **"Advanced DNS"** tab
+   - Scroll down to find **"Mail Settings"** or **"Email Forwarding"** section
+
+2. **Enable Email Forwarding:**
+   - Look for **"Email Forwarding"** toggle or section
+   - If there's a toggle, turn it **ON**
+   - Then you should see options to add forwarding addresses
+
+**Method 3: Using MX Records (Advanced - If above don't work)**
+
+1. **In Advanced DNS tab:**
+   - Scroll to **"Mail Settings"** section
+   - Look for **"Email Forwarding"** option
+   - Click **"Add Record"** or **"Enable Email Forwarding"**
+
+2. **If you see MX Records:**
+   - You may need to add an MX record for email forwarding
+   - Contact Namecheap support for assistance
+
+#### Step 3: Add Multiple Email Addresses
+
+After setting up your first forwarding:
+
+1. **Add More Forwarding Addresses:**
+   - Click **"Add Email Forwarding"** again
+   - Create:
      - `contact@psp-k.co.ke` → your-email@gmail.com
      - `hello@psp-k.co.ke` → your-email@gmail.com
+     - `info@psp-k.co.ke` → your-email@gmail.com
+     - `admin@psp-k.co.ke` → your-email@gmail.com
      - (Add as many as needed - all FREE!)
 
-3. **How It Works:**
-   - Someone emails: info@psp-k.co.ke
-   - Namecheap forwards it to: your-email@gmail.com
-   - You reply from your Gmail (or set up "Send as" to reply from info@psp-k.co.ke)
+2. **Each Forwarding:**
+   - **Mailbox**: The part before @ (e.g., `info`, `contact`)
+   - **Forward To**: Your personal email address
+   - Click **"Save"** after each one
+
+#### Step 4: Verify It Works
+
+1. **Test the Forwarding:**
+   - Send an email from another account to: `info@psp-k.co.ke`
+   - Check your personal email (Gmail, Outlook, etc.)
+   - You should receive the forwarded email within a few minutes
+
+2. **If Not Working:**
+   - Wait 15-30 minutes (DNS propagation)
+   - Check spam folder
+   - Verify the forwarding address is correct
+   - Contact Namecheap support if still not working
+
+#### How It Works:
+
+- Someone emails: `info@psp-k.co.ke`
+- Namecheap automatically forwards it to: `your-email@gmail.com`
+- You receive it in your Gmail inbox
+- You can reply from Gmail (see next section to reply as info@psp-k.co.ke)
 
 ### Reply from Your Domain Email (Optional):
 

@@ -41,6 +41,32 @@ export default function VolunteerPage() {
         setSubmitStatus('error')
         setErrorMessage('There was an error submitting your application. Please try again.')
       } else {
+        // Send email notification
+        try {
+          const emailResponse = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              subject: 'Volunteer Application',
+              message: `Skills: ${formData.skills || 'Not specified'}\nAvailability: ${formData.availability || 'Not specified'}\n\nMessage:\n${formData.message}`,
+              formType: 'volunteer',
+            }),
+          })
+
+          if (!emailResponse.ok) {
+            console.error('Email notification failed, but form was saved to database')
+            // Don't show error to user - form was saved successfully
+          }
+        } catch (emailError) {
+          console.error('Email notification error:', emailError)
+          // Don't show error to user - form was saved successfully
+        }
+
         setSubmitStatus('success')
         setFormData({
           name: '',

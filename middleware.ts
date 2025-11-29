@@ -9,16 +9,30 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // Create Supabase client using shared utility
-  const supabase = createMiddlewareClient(request, response)
+  // Check if Supabase environment variables are configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // Refresh session if expired - required for Server Components
-  // This ensures auth state is available in Server Components
+  // If Supabase is not configured, skip auth refresh and return response
+  // This allows the site to work even without Supabase configured
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return response
+  }
+
+  // Create Supabase client using shared utility
   try {
+    const supabase = createMiddlewareClient(request, response)
+
+    // Refresh session if expired - required for Server Components
+    // This ensures auth state is available in Server Components
     await supabase.auth.getUser()
   } catch (error) {
     // Silently handle auth errors in middleware
     // The actual auth check happens in protected routes
+    // Log error in production for debugging (optional)
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Middleware auth error:', error)
+    }
   }
 
   return response

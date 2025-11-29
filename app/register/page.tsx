@@ -114,6 +114,32 @@ export default function RegisterPage() {
             : 'There was an error submitting your registration. Please try again.'
         )
       } else {
+        // Send email notification
+        try {
+          const emailResponse = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: `${formData.firstName} ${formData.lastName}`,
+              email: formData.email,
+              phone: formData.phone,
+              subject: 'New Member Registration',
+              message: `ID Number: ${formData.idNumber}\nDate of Birth: ${formData.dateOfBirth}\nGender: ${formData.gender}\nCounty: ${formData.county}\nConstituency: ${formData.constituency}\nWard: ${formData.ward}\nPhysical Address: ${formData.physicalAddress || 'Not provided'}\nDisability Status: ${formData.disabilityStatus || 'Not specified'}`,
+              formType: 'registration',
+            }),
+          })
+
+          if (!emailResponse.ok) {
+            console.error('Email notification failed, but form was saved to database')
+            // Don't show error to user - form was saved successfully
+          }
+        } catch (emailError) {
+          console.error('Email notification error:', emailError)
+          // Don't show error to user - form was saved successfully
+        }
+
         setSubmitStatus('success')
         setFormData({
           firstName: '',

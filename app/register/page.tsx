@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -23,36 +24,123 @@ export default function RegisterPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
-    // TODO: Integrate with Supabase
-    // For now, just simulate submission
-    setTimeout(() => {
+    // Client-side validation
+    if (!formData.isKenyanCitizen || !formData.notMemberOfOtherParty || 
+        !formData.agreeToConstitution || !formData.consentToDataProcessing) {
+      setSubmitStatus('error')
+      setErrorMessage('Please agree to all declarations to complete registration.')
       setIsSubmitting(false)
-      setSubmitStatus('success')
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        idNumber: '',
-        dateOfBirth: '',
-        gender: '',
-        county: '',
-        constituency: '',
-        ward: '',
-        physicalAddress: '',
-        disabilityStatus: '',
-        isKenyanCitizen: false,
-        notMemberOfOtherParty: false,
-        agreeToConstitution: false,
-        consentToDataProcessing: false,
-      })
-    }, 1000)
+      return
+    }
+
+    // Validate age (must be 18+)
+    if (formData.dateOfBirth) {
+      const birthDate = new Date(formData.dateOfBirth)
+      const today = new Date()
+      let age = today.getFullYear() - birthDate.getFullYear()
+      const monthDiff = today.getMonth() - birthDate.getMonth()
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+      }
+      if (age < 18) {
+        setSubmitStatus('error')
+        setErrorMessage('You must be at least 18 years old to register as a member.')
+        setIsSubmitting(false)
+        return
+      }
+    }
+
+    // Validate National ID format (8-12 digits)
+    if (!/^\d{8,12}$/.test(formData.idNumber)) {
+      setSubmitStatus('error')
+      setErrorMessage('National ID Number must be 8-12 digits.')
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const supabase = createClient()
+
+      // Check for duplicate registration by ID number
+      const { data: existing } = await supabase
+        .from('registrations')
+        .select('id')
+        .eq('id_number', formData.idNumber)
+        .single()
+
+      if (existing) {
+        setSubmitStatus('error')
+        setErrorMessage('This National ID number is already registered. Please contact us if you believe this is an error.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Insert registration
+      const { data, error } = await supabase.from('registrations').insert([
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          id_number: formData.idNumber,
+          date_of_birth: formData.dateOfBirth,
+          gender: formData.gender,
+          county: formData.county,
+          constituency: formData.constituency,
+          ward: formData.ward,
+          physical_address: formData.physicalAddress || null,
+          disability_status: formData.disabilityStatus || null,
+          is_kenyan_citizen: formData.isKenyanCitizen,
+          not_member_of_other_party: formData.notMemberOfOtherParty,
+          agree_to_constitution: formData.agreeToConstitution,
+          consent_to_data_processing: formData.consentToDataProcessing,
+        },
+      ])
+
+      if (error) {
+        console.error('Registration error:', error)
+        setSubmitStatus('error')
+        setErrorMessage(
+          error.code === '23505'
+            ? 'This National ID number is already registered.'
+            : 'There was an error submitting your registration. Please try again.'
+        )
+      } else {
+        setSubmitStatus('success')
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          idNumber: '',
+          dateOfBirth: '',
+          gender: '',
+          county: '',
+          constituency: '',
+          ward: '',
+          physicalAddress: '',
+          disabilityStatus: '',
+          isKenyanCitizen: false,
+          notMemberOfOtherParty: false,
+          agreeToConstitution: false,
+          consentToDataProcessing: false,
+        })
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      setSubmitStatus('error')
+      setErrorMessage('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (
@@ -378,7 +466,7 @@ export default function RegisterPage() {
 
             {submitStatus === 'error' && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                There was an error with your registration. Please try again.
+                {errorMessage || 'There was an error with your registration. Please try again.'}
               </div>
             )}
 

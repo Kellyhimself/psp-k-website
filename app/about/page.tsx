@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'About Us | People Salvation Party of Kenya',
@@ -123,7 +124,7 @@ export default function AboutPage() {
               Download our official party documents to learn more about our ideology, manifesto,
               and vision for Kenya.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <a
                 href="/documents/ideology.pdf"
                 download="PSP-K-Ideology.pdf"
@@ -172,6 +173,14 @@ export default function AboutPage() {
                   />
                 </svg>
               </a>
+            </div>
+            <div className="text-center">
+              <Link
+                href="/downloads"
+                className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+              >
+                View All Downloads →
+              </Link>
             </div>
           </section>
         </div>

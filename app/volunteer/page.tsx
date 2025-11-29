@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function VolunteerPage() {
   const [formData, setFormData] = useState({
@@ -13,25 +14,50 @@ export default function VolunteerPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
-    // TODO: Integrate with Supabase
-    setTimeout(() => {
+    try {
+      const supabase = createClient()
+
+      const { data, error } = await supabase.from('volunteers').insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          skills: formData.skills || null,
+          availability: formData.availability || null,
+          message: formData.message,
+        },
+      ])
+
+      if (error) {
+        console.error('Volunteer form error:', error)
+        setSubmitStatus('error')
+        setErrorMessage('There was an error submitting your application. Please try again.')
+      } else {
+        setSubmitStatus('success')
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          skills: '',
+          availability: '',
+          message: '',
+        })
+      }
+    } catch (error) {
+      console.error('Volunteer form error:', error)
+      setSubmitStatus('error')
+      setErrorMessage('An unexpected error occurred. Please try again.')
+    } finally {
       setIsSubmitting(false)
-      setSubmitStatus('success')
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        skills: '',
-        availability: '',
-        message: '',
-      })
-    }, 1000)
+    }
   }
 
   const handleChange = (
@@ -161,7 +187,7 @@ export default function VolunteerPage() {
 
             {submitStatus === 'error' && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                There was an error submitting your application. Please try again.
+                {errorMessage || 'There was an error submitting your application. Please try again.'}
               </div>
             )}
 

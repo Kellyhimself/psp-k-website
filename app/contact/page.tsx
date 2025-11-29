@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -12,19 +13,42 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
-    // TODO: Integrate with Supabase or form service
-    // For now, just simulate submission
-    setTimeout(() => {
+    try {
+      const supabase = createClient()
+
+      const { data, error } = await supabase.from('contacts').insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          subject: formData.subject,
+          message: formData.message,
+        },
+      ])
+
+      if (error) {
+        console.error('Contact form error:', error)
+        setSubmitStatus('error')
+        setErrorMessage('There was an error sending your message. Please try again.')
+      } else {
+        setSubmitStatus('success')
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      }
+    } catch (error) {
+      console.error('Contact form error:', error)
+      setSubmitStatus('error')
+      setErrorMessage('An unexpected error occurred. Please try again.')
+    } finally {
       setIsSubmitting(false)
-      setSubmitStatus('success')
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-    }, 1000)
+    }
   }
 
   const handleChange = (
@@ -63,7 +87,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-lg mb-2">Email</h3>
                   <p className="text-gray-700">
                     <a href="mailto:info@psp-k.co.ke" className="hover:text-purple-600">
-                      info@psp-k.co.ke
+                      info@psp-k.com
                     </a>
                   </p>
                 </div>
@@ -155,7 +179,7 @@ export default function ContactPage() {
 
                 {submitStatus === 'error' && (
                   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    There was an error sending your message. Please try again.
+                    {errorMessage || 'There was an error sending your message. Please try again.'}
                   </div>
                 )}
 

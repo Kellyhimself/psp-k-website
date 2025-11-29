@@ -1,36 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import HeroSlider from '@/components/HeroSlider'
 
 export default function Home() {
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-600 via-green-600 to-white text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            People Salvation Party of Kenya
-          </h1>
-          <p className="text-2xl md:text-3xl mb-4">Meli ya Ukombozi</p>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Empowering Every Citizen. Join us in building a Kenya where every voice matters
-            and every dream has the opportunity to become reality.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
-              className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-            >
-              Register
-            </Link>
-            <Link
-              href="/volunteer"
-              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition"
-            >
-              Join Volunteer
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section with Dynamic Slider */}
+      <HeroSlider />
 
       {/* Mission Section */}
       <section className="py-16 bg-white">

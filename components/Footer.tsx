@@ -44,6 +44,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/downloads" className="hover:text-white transition">
+                  Downloads
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="hover:text-white transition">
                   Contact
                 </Link>
@@ -79,7 +84,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>Ukombozi House, Ndemi Road, Nairobi</li>
               <li>P.O Box 16202-00100</li>
-              <li>Email: info@psp-k.co.ke</li>
+              <li>Email: info@psp-k.com</li>
             </ul>
             <div className="mt-4 flex space-x-4">
               <a

@@ -40,6 +40,9 @@ export default function Header() {
             <Link href="/downloads" className="text-gray-700 hover:text-purple-600 transition">
               Downloads
             </Link>
+            <Link href="/media" className="text-gray-700 hover:text-purple-600 transition">
+              Media
+            </Link>
             <Link href="/contact" className="text-gray-700 hover:text-purple-600 transition">
               Contact
             </Link>
@@ -118,6 +121,13 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Downloads
+            </Link>
+            <Link
+              href="/media"
+              className="block py-2 text-gray-700 hover:text-purple-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Media
             </Link>
             <Link
               href="/contact"

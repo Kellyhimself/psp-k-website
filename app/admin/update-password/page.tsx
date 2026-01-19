@@ -3,39 +3,45 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
 
-export default function AdminLoginPage() {
-  const [email, setEmail] = useState('')
+export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    
+    if (password !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match' })
+      return
+    }
+
+    if (password.length < 6) {
+        setMessage({ type: 'error', text: 'Password must be at least 6 characters' })
+        return
+    }
+
     setIsLoading(true)
-    setError('')
+    setMessage(null)
 
     try {
       const supabase = createClient()
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error } = await supabase.auth.updateUser({ password: password })
 
-      if (signInError) {
-        setError(signInError.message)
-        setIsLoading(false)
-        return
-      }
-
-      if (data.user) {
-        router.push('/admin/dashboard')
-        router.refresh()
+      if (error) {
+        setMessage({ type: 'error', text: error.message })
+      } else {
+        setMessage({ type: 'success', text: 'Password updated successfully!' })
+        setTimeout(() => {
+          router.push('/admin/dashboard')
+        }, 2000)
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
+      setMessage({ type: 'error', text: 'An unexpected error occurred.' })
+    } finally {
       setIsLoading(false)
     }
   }
@@ -45,51 +51,53 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
+            Set New Password
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to manage featured posts and news
+            Please enter your new password below.
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                New Password
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+                placeholder="New Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
+          {message && (
+            <div className={`px-4 py-3 rounded ${
+              message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
+            }`}>
+              {message.text}
             </div>
           )}
 
@@ -99,27 +107,11 @@ export default function AdminLoginPage() {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? 'Updating...' : 'Update Password'}
             </button>
-          </div>
-
-          <div className="text-center space-y-2">
-            <Link
-              href="/admin/forgot-password"
-              className="block text-sm text-purple-600 hover:text-purple-500"
-            >
-              Forgot your password?
-            </Link>
-            <Link
-              href="/"
-              className="block text-sm text-purple-600 hover:text-purple-500"
-            >
-              ← Back to Home
-            </Link>
           </div>
         </form>
       </div>
     </div>
   )
 }
-

@@ -52,17 +52,6 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    checkAuth()
-    fetchPosts()
-  }, [])
-
-  useEffect(() => {
-    if (activeTab === 'users' && users.length === 0) {
-      fetchUsers()
-    }
-  }, [activeTab])
-
   async function checkAuth() {
     const supabase = createClient()
     const {
@@ -104,7 +93,6 @@ export default function AdminDashboard() {
     try {
       const supabase = createClient()
       
-      // First check if we're authenticated
       const { data: { user: authUser } } = await supabase.auth.getUser()
       console.log('Authenticated user:', authUser?.email)
       
@@ -140,6 +128,17 @@ export default function AdminDashboard() {
       setIsLoadingUsers(false)
     }
   }
+
+  useEffect(() => {
+    checkAuth()
+    fetchPosts()
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'users' && users.length === 0) {
+      fetchUsers()
+    }
+  }, [activeTab, users.length])
 
   async function handleDelete(id: string) {
     if (!confirm('Are you sure you want to delete this post?')) return
@@ -390,10 +389,17 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-4">
                   <p className="text-sm text-gray-600">
-                    Total Registered Members: <span className="font-semibold">{users.length}</span>
+                    Total Registered Members:{' '}
+                    <span className="font-semibold">{users.length}</span>
                   </p>
+                  <a
+                    href="/api/admin/export-registrations"
+                    className="inline-flex items-center px-4 py-2 border border-purple-600 text-sm font-medium rounded-lg text-purple-600 bg-white hover:bg-purple-50 transition"
+                  >
+                    Download CSV for ORPP/IEBC
+                  </a>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">

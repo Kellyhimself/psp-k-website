@@ -2,10 +2,28 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const supabase = createClient()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        setIsAdminLoggedIn(!!user)
+      } catch {
+        setIsAdminLoggedIn(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -46,12 +64,22 @@ export default function Header() {
             <Link href="/contact" className="text-gray-700 hover:text-purple-600 transition">
               Contact
             </Link>
-            <Link
-              href="/admin/login"
-              className="text-gray-700 hover:text-purple-600 transition"
-            >
-              Login
-            </Link>
+            {isAdminLoggedIn && (
+              <Link
+                href="/admin/dashboard"
+                className="text-gray-700 hover:text-purple-600 transition"
+              >
+                Admin Dashboard
+              </Link>
+            )}
+            {isAdminLoggedIn === false && (
+              <Link
+                href="/admin/login"
+                className="text-gray-700 hover:text-purple-600 transition"
+              >
+                Login
+              </Link>
+            )}
             <Link
               href="/register"
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
@@ -136,13 +164,24 @@ export default function Header() {
             >
               Contact
             </Link>
-            <Link
-              href="/admin/login"
-              className="block py-2 text-gray-700 hover:text-purple-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Login
-            </Link>
+            {isAdminLoggedIn && (
+              <Link
+                href="/admin/dashboard"
+                className="block py-2 text-gray-700 hover:text-purple-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin Dashboard
+              </Link>
+            )}
+            {isAdminLoggedIn === false && (
+              <Link
+                href="/admin/login"
+                className="block py-2 text-gray-700 hover:text-purple-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
             <Link
               href="/register"
               className="block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-center"

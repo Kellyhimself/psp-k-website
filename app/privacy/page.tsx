@@ -129,11 +129,18 @@ export default function PrivacyPage() {
                 provider
               </li>
             </ul>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed mb-4">
               To exercise these rights, please contact us at:{' '}
               <a href="mailto:info@psp-k.co.ke" className="text-purple-600 hover:underline">
                 info@psp-k.co.ke
               </a>
+            </p>
+            <p className="text-gray-700 leading-relaxed">
+              You can also submit a request online through our{' '}
+              <a href="/member/data-request" className="text-purple-600 hover:underline">
+                Data Rights Request portal
+              </a>
+              .
             </p>
           </section>
 

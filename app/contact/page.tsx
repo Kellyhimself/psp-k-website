@@ -127,7 +127,7 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold mb-6 text-purple-600">Get in Touch</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">HEADQUARTERS</h3>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-900">HEADQUARTERS</h3>
                   <p className="text-gray-700">
                     <strong>MNG Offices</strong>
                     <br />
@@ -140,12 +140,12 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Phone</h3>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-900">Phone</h3>
                   <p className="text-gray-700 font-mono">+254 723 116929</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Email</h3>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-900">Email</h3>
                   <div className="flex items-center gap-3">
                     <p className="text-gray-700 font-mono">info@psp-kenya.com</p>
                     <button
@@ -211,7 +211,7 @@ export default function ContactPage() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
 
@@ -226,7 +226,7 @@ export default function ContactPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
 
@@ -240,7 +240,7 @@ export default function ContactPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ export default function ContactPage() {
                     required
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
 
@@ -270,7 +270,7 @@ export default function ContactPage() {
                     rows={5}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
 

@@ -1,202 +1,94 @@
-export const metadata = {
-  title: 'Privacy Policy | People Salvation Party of Kenya',
-  description: 'PSP-K Privacy Policy and Data Protection information.',
-}
+import React from 'react';
+import Link from 'next/link';
 
 export default function PrivacyPage() {
   return (
-    <div className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-gray-800">Privacy Policy</h1>
-          <p className="text-lg text-gray-600 mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+    <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-neutral-900">
+      <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 shadow-sm rounded-xl">
+        <h1 className="text-3xl font-bold text-primary-900 mb-8 border-b pb-4">Privacy Policy</h1>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">1. Introduction</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              People Salvation Party of Kenya (PSP-K) is committed to protecting your privacy and
-              personal data. This Privacy Policy explains how we collect, use, store, and protect
-              your personal information in compliance with the Data Protection Act, 2019 of Kenya.
-            </p>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">1. Introduction</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            The People Salvation Party of Kenya (PSP-K) is committed to protecting your privacy and ensuring the security of your personal data. This policy outlines how we collect, use, and safeguard your information in compliance with the **Data Protection Act, 2019** and the **Political Parties Act**.
+          </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">2. Information We Collect</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              When you register as a member of PSP-K, we collect the following information:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-              <li>Full name (first name, last name)</li>
-              <li>National Identification Number</li>
-              <li>Email address</li>
-              <li>Phone number</li>
-              <li>Date of birth</li>
-              <li>Gender</li>
-              <li>Location information (County, Constituency, Ward)</li>
-              <li>Physical address (optional)</li>
-              <li>Disability status (optional)</li>
-            </ul>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">2. Information We Collect</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            We collect information necessary for party membership and legal compliance, including but not limited to:
+          </p>
+          <ul className="list-disc pl-5 mb-4 text-neutral-700 space-y-1">
+            <li>Name and Contact Information (Email, Phone)</li>
+            <li>Identification Number (National ID)</li>
+            <li>Voter Registration Details (County, Constituency, Ward)</li>
+            <li>Demographic Information (Sex, Date of Birth)</li>
+            <li><strong>Optional:</strong> Disability status (PWD Number may be provided voluntarily for inclusivity purposes)</li>
+          </ul>
+          <p className="mb-4 text-neutral-700 leading-relaxed font-medium bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+            <strong>Note on Disability Disclosure:</strong> Disclosure of disability status is <strong>not mandatory</strong>. It is collected solely for the purpose of ensuring inclusivity and providing necessary accommodations. You may choose to provide your PWD registration number if you wish to be identified as a Person with Disability.
+          </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">3. How We Use Your Information</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We use your personal information for the following purposes:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-              <li>To process and maintain your party membership</li>
-              <li>To verify your identity and eligibility for membership</li>
-              <li>To communicate with you about party activities, events, and updates</li>
-              <li>To comply with legal requirements under the Political Parties Act</li>
-              <li>To submit membership data to the Office of Registrar of Political Parties (ORPP)</li>
-              <li>To verify membership with the Independent Electoral and Boundaries Commission (IEBC) when required</li>
-              <li>To generate membership statistics and reports for compliance purposes</li>
-              <li>To ensure gender balance and inclusivity as required by law</li>
-            </ul>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">3. Purpose of Data Collection</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            Your data is used for:
+          </p>
+          <ul className="list-disc pl-5 mb-4 text-neutral-700 space-y-1">
+            <li>Processing your membership registration.</li>
+            <li>Maintaining the Party Membership Register as required by the Office of the Registrar of Political Parties (ORPP).</li>
+            <li>Communicating party activities, notices, and updates.</li>
+            <li>Statistical analysis to ensure regional and gender balance.</li>
+          </ul>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">4. Data Sharing</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We may share your information with:
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">4. Data Subject Rights</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            Under the Data Protection Act, you have the right to:
+          </p>
+          <ul className="list-disc pl-5 mb-4 text-neutral-700 space-y-1">
+            <li><strong>Access:</strong> Request a copy of the data we hold about you.</li>
+            <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data.</li>
+            <li><strong>Deletion:</strong> Request deletion of your data (subject to legal retention requirements).</li>
+            <li><strong>Resignation/Withdrawal:</strong> You have the right to resign from the party.</li>
+          </ul>
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+            <h3 className="font-semibold text-yellow-900 mb-2">Proof of Request</h3>
+            <p className="text-sm text-yellow-800">
+              To exercise your rights for data correction or deletion, or to finalize a resignation, we require a <strong>Proof of Request</strong> to verify your identity and intent. This ensures that no unauthorized changes are made to your membership record. Please visit our <Link href="/member/data-request" className="underline font-medium">Data Request Portal</Link> to submit your request securely.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-              <li>
-                <strong>Office of Registrar of Political Parties (ORPP):</strong> As required by law
-                for party registration and compliance reporting
-              </li>
-              <li>
-                <strong>Independent Electoral and Boundaries Commission (IEBC):</strong> For
-                membership verification when required by law
-              </li>
-              <li>
-                <strong>Service Providers:</strong> Third-party services that help us operate our
-                website (hosting, email services, etc.), all bound by confidentiality agreements
-              </li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed">
-              We do not sell, rent, or trade your personal information to third parties for
-              marketing purposes.
-            </p>
-          </section>
+          </div>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">5. Data Security</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We implement appropriate technical and organizational measures to protect your personal
-              data against unauthorized access, alteration, disclosure, or destruction. This
-              includes:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-              <li>Encryption of sensitive data</li>
-              <li>Secure storage systems</li>
-              <li>Access controls and authentication</li>
-              <li>Regular security audits</li>
-            </ul>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">5. Data Retention & Sharing</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            We retain your data only as long as you are a member or as required by law. We do not sell your personal data. We differ to the Office of the Registrar of Political Parties (ORPP) for statutory compliance.
+          </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">6. Data Retention</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We retain your personal information for as long as necessary to fulfill the purposes
-              outlined in this policy, comply with legal obligations, resolve disputes, and enforce
-              our agreements. Membership data is retained as required by the Political Parties Act
-              and may be kept for the duration of your membership and as required by law.
-            </p>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">6. Consent</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            By submitting your registration or data, you explicitly consent to the collection and processing of your personal information as described in this policy. You will be asked to confirm this consent before form submission.
+          </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">7. Your Rights</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Under the Data Protection Act, 2019, you have the right to:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-              <li>
-                <strong>Access:</strong> Request a copy of your personal data we hold
-              </li>
-              <li>
-                <strong>Correction:</strong> Request correction of inaccurate or incomplete data
-              </li>
-              <li>
-                <strong>Deletion:</strong> Request deletion of your personal data (subject to
-                legal requirements)
-              </li>
-              <li>
-                <strong>Objection:</strong> Object to processing of your personal data
-              </li>
-              <li>
-                <strong>Portability:</strong> Request transfer of your data to another service
-                provider
-              </li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              To exercise these rights, please contact us at:{' '}
-              <a href="mailto:info@psp-k.co.ke" className="text-purple-600 hover:underline">
-                info@psp-k.co.ke
-              </a>
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              You can also submit a request online through our{' '}
-              <a href="/member/data-request" className="text-purple-600 hover:underline">
-                Data Rights Request portal
-              </a>
-              .
-            </p>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary-800">7. Contact Us</h2>
+          <p className="mb-4 text-neutral-700 leading-relaxed">
+            For data protection inquiries, please contact our Data Protection Officer at: [Add Email]
+          </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">8. Cookies and Tracking</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Our website may use cookies and similar tracking technologies to enhance your
-              experience. You can control cookie preferences through your browser settings.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">9. Changes to This Policy</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We may update this Privacy Policy from time to time. We will notify you of any
-              significant changes by posting the new policy on this page and updating the "Last
-              updated" date.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">10. Contact Us</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              If you have any questions about this Privacy Policy or wish to exercise your rights,
-              please contact us:
-            </p>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <p className="text-gray-700">
-                <strong>People Salvation Party of Kenya (PSP-K)</strong>
-                <br />
-                Ukombozi House, Ndemi Road, Nairobi
-                <br />
-                P.O Box 16202-00100
-                <br />
-                Email:{' '}
-                <a href="mailto:info@psp-k.co.ke" className="text-purple-600 hover:underline">
-                  info@psp-k.co.ke
-                </a>
-              </p>
-            </div>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-purple-600">11. Compliance</h2>
-            <p className="text-gray-700 leading-relaxed">
-              This Privacy Policy is compliant with:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 mt-4">
-              <li>Data Protection Act, 2019 of Kenya</li>
-              <li>Political Parties Act, 2011</li>
-              <li>Constitution of Kenya, 2010</li>
-            </ul>
-          </section>
+        <div className="mt-8 pt-6 border-t flex justify-between items-center text-sm text-neutral-500">
+          <p>Last Updated: {new Date().toLocaleDateString()}</p>
+          <Link href="/" className="hover:text-primary-700 transition-colors">Return to Home</Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

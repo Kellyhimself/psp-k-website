@@ -40,7 +40,9 @@ interface RegisteredUser {
   created_at: string
 }
 
-type TabType = 'posts' | 'users'
+import SecuritySettings from '@/components/admin/SecuritySettings'
+
+type TabType = 'posts' | 'users' | 'settings'
 
 export default function AdminDashboard() {
   const [posts, setPosts] = useState<FeaturedPost[]>([])
@@ -61,6 +63,18 @@ export default function AdminDashboard() {
     if (!user) {
       router.push('/admin/login')
       return
+    }
+
+    // Strict 2FA Check
+    const { data: mfaData, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+
+    if (!error && mfaData) {
+      // If user has 2FA enabled (nextLevel='aal2') but is only at 'aal1', force them to login again
+      if (mfaData.currentLevel === 'aal1' && mfaData.nextLevel === 'aal2') {
+        console.warn('User has 2FA enabled but current session is AAL1. Redirecting to login.')
+        router.push('/admin/login')
+        return
+      }
     }
 
     setUser(user)
@@ -92,10 +106,10 @@ export default function AdminDashboard() {
     setIsLoadingUsers(true)
     try {
       const supabase = createClient()
-      
+
       const { data: { user: authUser } } = await supabase.auth.getUser()
       console.log('Authenticated user:', authUser?.email)
-      
+
       const { data, error } = await supabase
         .from('registrations')
         .select('*')
@@ -226,23 +240,30 @@ export default function AdminDashboard() {
           <nav className="-mb-px flex space-x-8">
             <button
               onClick={() => setActiveTab('posts')}
-              className={`${
-                activeTab === 'posts'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
+              className={`${activeTab === 'posts'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
             >
               Featured Posts ({posts.length})
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`${
-                activeTab === 'users'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
+              className={`${activeTab === 'users'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
             >
               Registered Users ({users.length || '...'})
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`${activeTab === 'settings'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
+            >
+              Settings
             </button>
           </nav>
         </div>
@@ -295,11 +316,10 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              post.is_published
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${post.is_published
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                              }`}
                           >
                             {post.is_published ? 'Published' : 'Draft'}
                           </span>
@@ -314,11 +334,10 @@ export default function AdminDashboard() {
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => handleTogglePublish(post.id, post.is_published)}
-                              className={`${
-                                post.is_published
-                                  ? 'text-orange-600 hover:text-orange-900'
-                                  : 'text-green-600 hover:text-green-900'
-                              }`}
+                              className={`${post.is_published
+                                ? 'text-orange-600 hover:text-orange-900'
+                                : 'text-green-600 hover:text-green-900'
+                                }`}
                             >
                               {post.is_published ? 'Unpublish' : 'Publish'}
                             </button>
@@ -461,8 +480,16 @@ export default function AdminDashboard() {
             )}
           </>
         )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className="max-w-4xl mx-auto">
+            <SecuritySettings />
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
 

@@ -25,7 +25,29 @@ export async function middleware(request: NextRequest) {
 
     // Refresh session if expired - required for Server Components
     // This ensures auth state is available in Server Components
-    await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Protected Route Protection: /admin and /downloads
+    const isProtectedRoute =
+      (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) ||
+      request.nextUrl.pathname.startsWith('/downloads')
+
+    if (isProtectedRoute) {
+
+      // 1. Check if user is logged in
+      if (!user) {
+        return NextResponse.redirect(new URL('/admin/login', request.url))
+      }
+
+      // 2. Check for 2FA (AAL2) Requirement
+      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+
+      if (mfaData && mfaData.currentLevel === 'aal1' && mfaData.nextLevel === 'aal2') {
+        // User has 2FA enabled but is currently only on Password (AAL1) level
+        // Redirect to login to force 2FA challenge
+        return NextResponse.redirect(new URL('/admin/login', request.url))
+      }
+    }
   } catch (error) {
     // Silently handle auth errors in middleware
     // The actual auth check happens in protected routes

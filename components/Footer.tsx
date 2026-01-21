@@ -82,9 +82,12 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li>Ukombozi House, Ndemi Road, Nairobi</li>
-              <li>P.O Box 16202-00100</li>
-              <li>Email: info@psp-k.com</li>
+              <li className="font-semibold mb-1">HQ - MNG Offices</li>
+              <li>Suite B1, Ground Floor</li>
+              <li>Ndemi Road, Kilimani, Nairobi</li>
+              <li>P.O Box 1622-00100</li>
+              <li>Phone: +254 723 116929</li>
+              <li>Email: info@psp-kenya.com</li>
             </ul>
             <div className="mt-4 flex space-x-4">
               <a

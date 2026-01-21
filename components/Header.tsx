@@ -55,9 +55,11 @@ export default function Header() {
             <Link href="/notices" className="text-gray-700 hover:text-purple-600 transition">
               Notices
             </Link>
-            <Link href="/downloads" className="text-gray-700 hover:text-purple-600 transition">
-              Downloads
-            </Link>
+            {isAdminLoggedIn && (
+              <Link href="/downloads" className="text-gray-700 hover:text-purple-600 transition">
+                Downloads
+              </Link>
+            )}
             <Link href="/media" className="text-gray-700 hover:text-purple-600 transition">
               Media
             </Link>
@@ -80,6 +82,9 @@ export default function Header() {
                 Login
               </Link>
             )}
+            <Link href="/search" className="text-gray-600 hover:text-purple-600 transition" aria-label="Search">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </Link>
             <Link
               href="/register"
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
@@ -87,6 +92,10 @@ export default function Header() {
               Register
             </Link>
           </div>
+
+          <Link href="/search" className="text-gray-600 hover:text-purple-600 transition p-2" aria-label="Search">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </Link>
 
           {/* Mobile Menu Button */}
           <button
@@ -143,13 +152,15 @@ export default function Header() {
             >
               Notices
             </Link>
-            <Link
-              href="/downloads"
-              className="block py-2 text-gray-700 hover:text-purple-600"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Downloads
-            </Link>
+            {isAdminLoggedIn && (
+              <Link
+                href="/downloads"
+                className="block py-2 text-gray-700 hover:text-purple-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Downloads
+              </Link>
+            )}
             <Link
               href="/media"
               className="block py-2 text-gray-700 hover:text-purple-600"

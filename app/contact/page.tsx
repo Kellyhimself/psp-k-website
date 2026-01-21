@@ -88,7 +88,7 @@ export default function ContactPage() {
   }
 
   const copyEmailToClipboard = async () => {
-    const email = 'info@psp-kenya.com'
+    const email = 'info@psp-k.com'
     try {
       await navigator.clipboard.writeText(email)
       setEmailCopied(true)
@@ -125,17 +125,25 @@ export default function ContactPage() {
             {/* Contact Information */}
             <div>
               <h2 className="text-2xl font-bold mb-6 text-purple-600">Get in Touch</h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Address</h3>
+                  <h3 className="font-semibold text-lg mb-2">HEADQUARTERS</h3>
                   <p className="text-gray-700">
-                    Ukombozi House
+                    <strong>MNG Offices</strong>
                     <br />
-                    Ndemi Road, Nairobi
+                    Suite B1, Ground Floor
                     <br />
-                    P.O Box 16202-00100
+                    Ndemi Road, Kilimani, Nairobi
+                    <br />
+                    P.O Box 1622-00100
                   </p>
                 </div>
+
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Phone</h3>
+                  <p className="text-gray-700 font-mono">+254 723 116929</p>
+                </div>
+
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Email</h3>
                   <div className="flex items-center gap-3">

@@ -139,12 +139,20 @@ export default function HeroSlider() {
           )}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {currentPost.link_url ? (
-              <Link
-                href={currentPost.link_url}
-                className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block"
-              >
-                Learn More
-              </Link>
+              <>
+                <Link
+                  href="/register"
+                  className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                >
+                  Register
+                </Link>
+                <Link
+                  href={currentPost.link_url}
+                  className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition inline-block"
+                >
+                  Learn More
+                </Link>
+              </>
             ) : (
               <>
                 <Link
@@ -216,11 +224,10 @@ export default function HeroSlider() {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition ${
-                index === currentIndex
+              className={`w-3 h-3 rounded-full transition ${index === currentIndex
                   ? 'bg-white w-8'
                   : 'bg-white/50 hover:bg-white/75'
-              }`}
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

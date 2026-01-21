@@ -271,13 +271,13 @@ export default function RegisterPage() {
             <p className="text-sm text-blue-700 mb-4">
               Enter your National ID or Passport Number below to quickly check if you are already registered in our database.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <input
                 type="text"
                 value={checkId}
                 onChange={(e) => setCheckId(e.target.value)}
                 placeholder="Enter ID/Passport Number"
-                className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500"
               />
               <button
                 onClick={handleMemberCheck}
@@ -360,7 +360,7 @@ export default function RegisterPage() {
                     <input
                       type="text" id="firstName" name="firstName" required
                       value={formData.firstName} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
                       placeholder="e.g. John"
                     />
                   </div>
@@ -369,7 +369,7 @@ export default function RegisterPage() {
                     <input
                       type="text" id="otherNames" name="otherNames"
                       value={formData.otherNames} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
                       placeholder="e.g. Mwangi (Optional)"
                     />
                   </div>
@@ -378,7 +378,7 @@ export default function RegisterPage() {
                     <input
                       type="text" id="lastName" name="lastName" required
                       value={formData.lastName} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
                       placeholder="e.g. Kamau"
                     />
                   </div>
@@ -390,7 +390,7 @@ export default function RegisterPage() {
                     <select
                       id="identityType" name="identityType"
                       value={formData.identityType} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="National ID">National ID</option>
                       <option value="Passport">Passport</option>
@@ -403,7 +403,7 @@ export default function RegisterPage() {
                     <input
                       type="text" id="idNumber" name="idNumber" required
                       value={formData.idNumber} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                     />
                   </div>
                 </div>
@@ -415,7 +415,7 @@ export default function RegisterPage() {
                       type="date" id="dateOfBirth" name="dateOfBirth" required
                       max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                       value={formData.dateOfBirth} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                     />
                   </div>
                   <div>
@@ -423,7 +423,7 @@ export default function RegisterPage() {
                     <select
                       id="gender" name="gender" required
                       value={formData.gender} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
@@ -438,7 +438,7 @@ export default function RegisterPage() {
                     <select
                       id="religion" name="religion"
                       value={formData.religion} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">Select Religion</option>
                       {religions.map(r => <option key={r} value={r}>{r}</option>)}
@@ -449,7 +449,7 @@ export default function RegisterPage() {
                     <select
                       id="ethnicity" name="ethnicity"
                       value={formData.ethnicity} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">Select Ethnicity</option>
                       {ethnicities.map(e => <option key={e} value={e}>{e}</option>)}
@@ -468,7 +468,7 @@ export default function RegisterPage() {
                     <input
                       type="email" id="email" name="email" required
                       value={formData.email} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                     />
                   </div>
                   <div>
@@ -476,7 +476,7 @@ export default function RegisterPage() {
                     <input
                       type="tel" id="phone" name="phone" required
                       value={formData.phone} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                     />
                   </div>
                 </div>
@@ -487,7 +487,7 @@ export default function RegisterPage() {
                     <select
                       id="county" name="county" required
                       value={formData.county} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">Select County</option>
                       {kenyaLocations.map(c => (
@@ -501,7 +501,7 @@ export default function RegisterPage() {
                       id="constituency" name="constituency" required
                       value={formData.constituency} onChange={handleChange}
                       disabled={!formData.county}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 bg-white"
                     >
                       <option value="">Select {formData.county ? 'Constituency' : 'County First'}</option>
                       {availableConstituencies.map(c => (
@@ -515,7 +515,7 @@ export default function RegisterPage() {
                       <select
                         id="ward" name="ward" required
                         value={formData.ward} onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                       >
                         <option value="">Select Ward</option>
                         {availableWards.map(w => (
@@ -528,7 +528,7 @@ export default function RegisterPage() {
                         value={formData.ward} onChange={handleChange}
                         placeholder={formData.constituency ? "Enter Ward Name" : "Select Constituency First"}
                         disabled={!formData.constituency}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100 text-gray-900 bg-white placeholder:text-gray-500"
                       />
                     )}
                   </div>
@@ -558,7 +558,7 @@ export default function RegisterPage() {
                         type="text" id="pwdNumber" name="pwdNumber" required={formData.isDisabled}
                         value={formData.pwdNumber} onChange={handleChange}
                         placeholder="e.g. NCPWD/123456"
-                        className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                        className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white placeholder:text-gray-500"
                       />
                     </div>
                   )}

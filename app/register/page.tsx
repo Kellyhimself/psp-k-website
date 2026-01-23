@@ -7,20 +7,21 @@ import { kenyaLocations, religions, ethnicities } from '@/lib/data/kenya-locatio
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    otherNames: '',
+    firstName: '', // Will be used for "Other Names"
+    lastName: '',  // Will be used for "Surname"
+    // otherNames removed as requested
     email: '',
     phone: '',
     identityType: 'National ID',
     idNumber: '',
     dateOfBirth: '',
-    gender: '',
+    gender: '', // Label will be "Sex"
     county: '',
     constituency: '',
     ward: '',
     isDisabled: false,
     pwdNumber: '',
+    sig: [] as string[], // Special Interest Groups
     religion: '',
     ethnicity: '',
     notMemberOfOtherParty: false,
@@ -159,12 +160,12 @@ export default function RegisterPage() {
       // Insert registration
       const { data, error } = await supabase.from('registrations').insert([
         {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          other_names: formData.otherNames || null, // Mapping new field
+          first_name: formData.firstName, // Mapped to "Other Names"
+          last_name: formData.lastName,   // Mapped to "Surname"
+          other_names: null,              // Removed
           email: formData.email,
           phone: formData.phone,
-          identity_type: formData.identityType, // Mapping new field
+          identity_type: formData.identityType,
           id_number: formData.idNumber,
           date_of_birth: formData.dateOfBirth,
           gender: formData.gender,
@@ -172,6 +173,7 @@ export default function RegisterPage() {
           constituency: formData.constituency,
           ward: formData.ward,
           pwd_number: formData.isDisabled ? formData.pwdNumber : null,
+          special_interest_groups: formData.sig.length > 0 ? formData.sig : null, // New Field
           religion: formData.religion || null,
           ethnicity: formData.ethnicity || null,
           not_member_of_other_party: formData.notMemberOfOtherParty,
@@ -202,10 +204,10 @@ export default function RegisterPage() {
         setSubmitStatus('success')
         // Reset form
         setFormData({
-          firstName: '', lastName: '', otherNames: '', email: '', phone: '',
+          firstName: '', lastName: '', email: '', phone: '',
           identityType: 'National ID', idNumber: '', dateOfBirth: '',
           gender: '', county: '', constituency: '', ward: '',
-          isDisabled: false, pwdNumber: '', religion: '', ethnicity: '',
+          isDisabled: false, pwdNumber: '', sig: [], religion: '', ethnicity: '',
           notMemberOfOtherParty: false, consentToDataProcessing: false,
         })
       }
@@ -229,6 +231,17 @@ export default function RegisterPage() {
       const newData = { ...prev, [name]: value }
       if (name === 'county') newData.constituency = ''
       return newData
+    })
+  }
+
+  const handleSigChange = (category: string) => {
+    setFormData(prev => {
+      const currentSigs = prev.sig || []
+      if (currentSigs.includes(category)) {
+        return { ...prev, sig: currentSigs.filter(c => c !== category) }
+      } else {
+        return { ...prev, sig: [...currentSigs, category] }
+      }
     })
   }
 
@@ -354,25 +367,7 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Personal Information</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
-                    <input
-                      type="text" id="firstName" name="firstName" required
-                      value={formData.firstName} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
-                      placeholder="e.g. John"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="otherNames" className="block text-sm font-medium text-gray-700 mb-2">Other Names</label>
-                    <input
-                      type="text" id="otherNames" name="otherNames"
-                      value={formData.otherNames} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
-                      placeholder="e.g. Mwangi (Optional)"
-                    />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">Surname *</label>
                     <input
@@ -380,6 +375,15 @@ export default function RegisterPage() {
                       value={formData.lastName} onChange={handleChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
                       placeholder="e.g. Kamau"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">Other Names *</label>
+                    <input
+                      type="text" id="firstName" name="firstName" required
+                      value={formData.firstName} onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 bg-white placeholder:text-gray-500"
+                      placeholder="e.g. John Mwangi"
                     />
                   </div>
                 </div>
@@ -419,13 +423,13 @@ export default function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">Sex *</label>
                     <select
                       id="gender" name="gender" required
                       value={formData.gender} onChange={handleChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
-                      <option value="">Select Gender</option>
+                      <option value="">Select Sex</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                     </select>
@@ -539,6 +543,24 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Inclusive Support</h3>
 
+                {/* SIG Checkboxes */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Special Interest Groups (Select all that apply)</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    {['MARGINALIZED', 'MINORITY', 'WOMEN', 'YOUTH'].map((sig) => (
+                      <label key={sig} className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.sig.includes(sig)}
+                          onChange={() => handleSigChange(sig)}
+                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                        />
+                        <span className="text-gray-700 capitalize">{sig.toLowerCase()}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <label className="flex items-center space-x-3 mb-4">
                     <input
@@ -575,9 +597,9 @@ export default function RegisterPage() {
                     checked={formData.notMemberOfOtherParty} onChange={handleChange}
                     className="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                   />
-                  <span className="text-sm text-gray-700">
-                    I confirm that I am not a member of any other political party.
-                  </span>
+                  <div className="text-sm text-gray-700">
+                    I confirm that I am not a member of any other political party and I have read the <Link href="/terms" className="text-purple-600 hover:underline font-medium" target="_blank">Terms of Service</Link>.
+                  </div>
                 </label>
 
                 <label className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">

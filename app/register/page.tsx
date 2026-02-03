@@ -26,6 +26,7 @@ export default function RegisterPage() {
     ethnicity: '',
     notMemberOfOtherParty: false,
     consentToDataProcessing: false,
+    consentToImageUse: false,
   })
 
   // Registration Form Status
@@ -160,9 +161,9 @@ export default function RegisterPage() {
       // Insert registration
       const { data, error } = await supabase.from('registrations').insert([
         {
-          first_name: formData.firstName, // Mapped to "Other Names"
-          last_name: formData.lastName,   // Mapped to "Surname"
-          other_names: null,              // Removed
+          first_name: formData.firstName, // Other Names (required by DB)
+          last_name: formData.lastName,   // Surname
+          other_names: formData.firstName, // Other Names (first + middle names)
           email: formData.email,
           phone: formData.phone,
           identity_type: formData.identityType,
@@ -172,12 +173,14 @@ export default function RegisterPage() {
           county: formData.county,
           constituency: formData.constituency,
           ward: formData.ward,
-          pwd_number: formData.isDisabled ? formData.pwdNumber : null,
+          disability_status: formData.isDisabled,
+          pwd_number: formData.pwdNumber || null,
           special_interest_groups: formData.sig.length > 0 ? formData.sig : null, // New Field
           religion: formData.religion || null,
           ethnicity: formData.ethnicity || null,
           not_member_of_other_party: formData.notMemberOfOtherParty,
           consent_to_data_processing: formData.consentToDataProcessing,
+          consent_to_image_use: formData.consentToImageUse,
         },
       ])
 
@@ -209,6 +212,7 @@ export default function RegisterPage() {
           gender: '', county: '', constituency: '', ward: '',
           isDisabled: false, pwdNumber: '', sig: [], religion: '', ethnicity: '',
           notMemberOfOtherParty: false, consentToDataProcessing: false,
+          consentToImageUse: false,
         })
       }
     } catch (error) {
@@ -611,6 +615,18 @@ export default function RegisterPage() {
                   <div className="text-sm text-gray-700">
                     <span>I explicitly consent to the collection and processing of my personal data for party membership purposes as described in the </span>
                     <Link href="/privacy" className="text-purple-600 hover:underline font-medium" target="_blank">Privacy Policy</Link>.
+                  </div>
+                </label>
+
+                <label className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                  <input
+                    type="checkbox" name="consentToImageUse"
+                    checked={formData.consentToImageUse} onChange={handleChange}
+                    className="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  />
+                  <div className="text-sm text-gray-700">
+                    <span>I consent to the use of my photograph/image by the party for official membership records, party communications, and promotional materials.</span>
+                    <span className="text-gray-500 ml-1">(Optional)</span>
                   </div>
                 </label>
               </div>

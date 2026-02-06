@@ -17,18 +17,37 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4 text-primary-800">2. Information We Collect</h2>
           <p className="mb-4 text-neutral-700 leading-relaxed">
-            We collect information necessary for party membership and legal compliance, including but not limited to:
+            We collect information necessary for party membership, legal compliance, and inclusivity. Below is a comprehensive list of all data we collect:
           </p>
+
+          <h3 className="font-semibold text-neutral-800 mt-4 mb-2">Mandatory Information:</h3>
           <ul className="list-disc pl-5 mb-4 text-neutral-700 space-y-1">
-            <li>Name and Contact Information (Email, Phone)</li>
-            <li>Identification Number (National ID)</li>
-            <li>Voter Registration Details (County, Constituency, Ward)</li>
-            <li>Demographic Information (Sex, Date of Birth)</li>
-            <li><strong>Optional:</strong> Disability status (PWD Number may be provided voluntarily for inclusivity purposes)</li>
+            <li><strong>Full Name:</strong> Surname and Other Names</li>
+            <li><strong>Contact Information:</strong> Email Address and Phone Number</li>
+            <li><strong>Identification:</strong> National ID or Passport Number</li>
+            <li><strong>Date of Birth:</strong> To verify age eligibility (must be 18+)</li>
+            <li><strong>Sex:</strong> Male or Female</li>
+            <li><strong>Location:</strong> County, Constituency, and Ward of residence</li>
           </ul>
-          <p className="mb-4 text-neutral-700 leading-relaxed font-medium bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-            <strong>Note on Disability Disclosure:</strong> Disclosure of disability status is <strong>not mandatory</strong>. It is collected solely for the purpose of ensuring inclusivity and providing necessary accommodations. You may choose to provide your PWD registration number if you wish to be identified as a Person with Disability.
-          </p>
+
+          <h3 className="font-semibold text-neutral-800 mt-4 mb-2">Optional Information:</h3>
+          <ul className="list-disc pl-5 mb-4 text-neutral-700 space-y-1">
+            <li><strong>Religion:</strong> For demographic analysis and ensuring religious diversity representation</li>
+            <li><strong>Ethnicity:</strong> For demographic analysis and ensuring ethnic diversity representation in party structures</li>
+            <li><strong>Disability Status:</strong> PWD registration number (NCPWD) for inclusivity purposes</li>
+            <li><strong>Special Interest Groups (SIG):</strong> Self-identification as Marginalized, Minority, Women, or Youth for representation purposes</li>
+            <li><strong>Image Consent:</strong> Your consent for the party to use your photograph in official records, communications, and promotional materials</li>
+          </ul>
+
+          <div className="mb-4 text-neutral-700 leading-relaxed font-medium bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+            <strong>Note on Sensitive Data:</strong> Disclosure of religion, ethnicity, disability status, and SIG membership is <strong>entirely voluntary</strong>. This information is collected solely for:
+            <ul className="list-disc pl-5 mt-2 space-y-1 font-normal">
+              <li>Ensuring inclusive representation in party leadership and structures</li>
+              <li>Compliance with constitutional requirements for diversity</li>
+              <li>Providing necessary accommodations for persons with disabilities</li>
+              <li>Statistical reporting to regulatory bodies (anonymized)</li>
+            </ul>
+          </div>
         </section>
 
         <section className="mb-8">
@@ -80,7 +99,12 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4 text-primary-800">7. Contact Us</h2>
           <p className="mb-4 text-neutral-700 leading-relaxed">
-            For data protection inquiries, please contact our Data Protection Officer at: [Add Email]
+            For data protection inquiries, please contact our Data Protection Officer at:{' '}
+            <a href="mailto:dpo@psp-kenya.com" className="text-purple-600 hover:underline">dpo@psp-kenya.com</a>
+          </p>
+          <p className="text-neutral-700 leading-relaxed">
+            For general inquiries, visit our <Link href="/contact" className="text-purple-600 hover:underline">Contact Page</Link> or email{' '}
+            <a href="mailto:info@psp-kenya.com" className="text-purple-600 hover:underline">info@psp-kenya.com</a>
           </p>
         </section>
 

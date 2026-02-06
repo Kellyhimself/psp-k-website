@@ -44,9 +44,22 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Resignation</h2>
+            <p className="mb-4">
+              You have the right to resign from the party at any time. Resignation is a fully automated process
+              and <strong>does not require manual approval or processing by the party</strong>. Your resignation
+              will be effective immediately upon verification of your identity.
+            </p>
+            <p className="mb-4">
+              You may resign through any of the following methods:
+            </p>
+            <ul className="list-disc pl-5 space-y-2 mb-4">
+              <li><strong>USSD:</strong> Dial *509# and follow the prompts to resign from the party.</li>
+              <li><strong>ORPP Portal:</strong> Visit <a href="https://ippms.orpp.or.ke" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">ippms.orpp.or.ke</a> to process your resignation online.</li>
+              <li><strong>Our Portal:</strong> Use our <Link href="/member/data-request" className="text-purple-600 hover:underline">Data Request Portal</Link> to submit a resignation request with verification.</li>
+            </ul>
             <p>
-              You have the right to resign from the party at any time by notifying the party in writing or through 
-              the mechanisms provided by the Office of the Registrar of Political Parties (ORPP).
+              Upon resignation, your membership record will be updated accordingly in compliance with the
+              Political Parties Act and ORPP regulations.
             </p>
           </section>
 

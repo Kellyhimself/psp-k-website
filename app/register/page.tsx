@@ -36,92 +36,139 @@ export default function RegisterPage() {
 
   // Member Check Status
   const [checkId, setCheckId] = useState('')
+  const [checkSurname, setCheckSurname] = useState('')
+  const [checkOtherNames, setCheckOtherNames] = useState('')
   const [isChecking, setIsChecking] = useState(false)
   const [checkResult, setCheckResult] = useState<{ found: boolean; message: string } | null>(null)
+  const [checkConsent, setCheckConsent] = useState(false) // Consent for checking own status
 
-  // Derived state for constituencies based on selected county
+  // Sorted counties list
+  const sortedCounties = useMemo(() => {
+    return [...kenyaLocations].sort((a, b) => a.name.localeCompare(b.name))
+  }, [])
+
+  // Derived state for constituencies based on selected county (sorted alphabetically)
   const availableConstituencies = useMemo(() => {
     const countyData = kenyaLocations.find(c => c.name === formData.county)
-    return countyData ? countyData.constituencies : []
+    if (!countyData) return []
+    return [...countyData.constituencies].sort((a, b) => a.name.localeCompare(b.name))
   }, [formData.county])
 
+  // Sorted wards based on selected constituency
   const availableWards = useMemo(() => {
     if (!formData.constituency) return []
-    // availableConstituencies is an array of objects now
     const constituency = availableConstituencies.find(c => c.name === formData.constituency)
-    return constituency ? constituency.wards : []
+    if (!constituency) return []
+    return [...constituency.wards].sort((a, b) => a.localeCompare(b))
   }, [formData.constituency, availableConstituencies])
+
+  // Calculate age from date of birth
+  const calculateAge = (dob: string): number => {
+    if (!dob) return 0
+    const birthDate = new Date(dob)
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    return age
+  }
+
+  const userAge = useMemo(() => calculateAge(formData.dateOfBirth), [formData.dateOfBirth])
 
   // Validation Logic
   const validateForm = () => {
-    // 1. Declarations
+    // 1. Name validation - no numbers allowed
+    const nameRegex = /^[a-zA-Z\s'-]+$/
+    if (!nameRegex.test(formData.lastName)) {
+      return 'Surname should only contain letters, spaces, hyphens, or apostrophes.'
+    }
+    if (!nameRegex.test(formData.firstName)) {
+      return 'Other Names should only contain letters, spaces, hyphens, or apostrophes.'
+    }
+
+    // 2. Declarations
     if (!formData.notMemberOfOtherParty || !formData.consentToDataProcessing) {
       return 'Please agree to all declarations to complete registration.'
     }
 
-    // 2. Disability
+    // 3. Disability
     if (formData.isDisabled && !formData.pwdNumber) {
       return 'Please provide your NCPWD Registration Number.'
     }
 
-    // 3. Age (18+)
+    // 4. Age (18+)
     if (formData.dateOfBirth) {
-      const birthDate = new Date(formData.dateOfBirth)
-      const today = new Date()
-      let age = today.getFullYear() - birthDate.getFullYear()
-      const monthDiff = today.getMonth() - birthDate.getMonth()
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--
-      }
-      if (age < 18) {
+      if (userAge < 18) {
         return 'You must be at least 18 years old to register as a member.'
       }
     }
 
-    // 4. ID / Passport Format
+    // 5. ID / Passport Format
     if (formData.identityType === 'National ID') {
-      if (!/^\d{7,10}$/.test(formData.idNumber)) { // Kenyan IDs usually 7 or 8 digits, allowing range
+      if (!/^\d{7,10}$/.test(formData.idNumber)) {
         return 'National ID Number must be numeric (7-10 digits).'
       }
     } else if (formData.identityType === 'Passport') {
-      if (formData.idNumber.length < 6) {
-        return 'Passport Number seems too short.'
+      if (!/^[A-Z0-9]{6,9}$/i.test(formData.idNumber)) {
+        return 'Passport Number must be 6-9 alphanumeric characters.'
       }
     }
 
-    // 5. Email Validation
+    // 6. Email Validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(formData.email)) {
       return 'Please enter a valid email address.'
     }
 
-    // 6. Phone Validation (Kenyan Format)
-    // Accepts: +2547..., 2547..., 07..., 01...
+    // 7. Phone Validation (Kenyan Format)
     const phoneRegex = /^(?:\+254|254|0)((7|1)\d{8})$/
     if (!phoneRegex.test(formData.phone)) {
       return 'Please enter a valid Kenyan phone number (e.g., 0712345678).'
+    }
+
+    // 8. SIG validation - check for invalid selections
+    if (formData.sig.includes('WOMEN') && formData.gender === 'Male') {
+      return 'Women SIG is only available for female members.'
+    }
+    if (formData.sig.includes('YOUTH') && userAge > 35) {
+      return 'Youth SIG is only available for members aged 35 and below.'
     }
 
     return null
   }
 
   const handleMemberCheck = async () => {
-    if (!checkId) return
+    if (!checkId || !checkSurname || !checkOtherNames) return
     setIsChecking(true)
     setCheckResult(null)
     try {
       const supabase = createClient()
-      const { data, error } = await supabase.rpc('check_membership_status', { check_id: checkId })
+
+      // Use secure RPC function that verifies ID + name match
+      const { data, error } = await supabase.rpc('check_membership_status_verified', {
+        p_id_number: checkId.trim(),
+        p_surname: checkSurname.trim(),
+        p_other_names: checkOtherNames.trim()
+      })
+
       if (error) throw error
 
-      if (data && data.exists) {
-        setCheckResult({ found: true, message: `Member Found: ${data.message}` })
+      if (data) {
+        if (data.found && data.verified) {
+          setCheckResult({ found: true, message: 'You are already registered as a PSP-K member.' })
+        } else if (data.found && !data.verified) {
+          setCheckResult({ found: false, message: 'The name provided does not match our records for this ID. Please verify your details are correct.' })
+        } else {
+          setCheckResult({ found: false, message: 'Member Not Found. You may proceed with registration.' })
+        }
       } else {
         setCheckResult({ found: false, message: 'Member Not Found. You may proceed with registration.' })
       }
     } catch (err) {
-      console.error(err)
-      setCheckResult({ found: false, message: 'Error checking status. Please try again.' })
+      console.error('Membership check error:', err)
+      setCheckResult({ found: false, message: 'Error checking status. Please try again later.' })
     } finally {
       setIsChecking(false)
     }
@@ -234,6 +281,26 @@ export default function RegisterPage() {
     setFormData(prev => {
       const newData = { ...prev, [name]: value }
       if (name === 'county') newData.constituency = ''
+
+      // Auto-remove invalid SIG selections when gender changes
+      if (name === 'gender' && value === 'Male') {
+        newData.sig = newData.sig.filter(s => s !== 'WOMEN')
+      }
+
+      // Auto-remove YOUTH SIG if date of birth indicates age > 35
+      if (name === 'dateOfBirth' && value) {
+        const birthDate = new Date(value as string)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--
+        }
+        if (age > 35) {
+          newData.sig = newData.sig.filter(s => s !== 'YOUTH')
+        }
+      }
+
       return newData
     })
   }
@@ -282,27 +349,59 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* QUICK CHECK SECTION - NEW FEATURE */}
+          {/* QUICK CHECK SECTION - WITH CONSENT AND NAME VERIFICATION */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-10 shadow-sm">
-            <h3 className="text-lg font-bold text-blue-900 mb-2">Already a Member? Check Status</h3>
+            <h3 className="text-lg font-bold text-blue-900 mb-2">Already a Member? Check Your Status</h3>
             <p className="text-sm text-blue-700 mb-4">
-              Enter your National ID or Passport Number below to quickly check if you are already registered in our database.
+              Enter your full name and ID/Passport number below to verify your membership status.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="text"
-                value={checkId}
-                onChange={(e) => setCheckId(e.target.value)}
-                placeholder="Enter ID/Passport Number"
-                className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500"
-              />
-              <button
-                onClick={handleMemberCheck}
-                disabled={isChecking || !checkId}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
-              >
-                {isChecking ? 'Checking...' : 'Check Status'}
-              </button>
+            <div className="space-y-4">
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checkConsent}
+                  onChange={(e) => setCheckConsent(e.target.checked)}
+                  className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-blue-800">
+                  I confirm that I am checking my own membership status and the details I am entering belong to me.
+                </span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  value={checkSurname}
+                  onChange={(e) => setCheckSurname(e.target.value)}
+                  placeholder="Your Surname"
+                  disabled={!checkConsent}
+                  className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <input
+                  type="text"
+                  value={checkOtherNames}
+                  onChange={(e) => setCheckOtherNames(e.target.value)}
+                  placeholder="Your Other Names"
+                  disabled={!checkConsent}
+                  className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="text"
+                  value={checkId}
+                  onChange={(e) => setCheckId(e.target.value)}
+                  placeholder="Your ID/Passport Number"
+                  disabled={!checkConsent}
+                  className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <button
+                  onClick={handleMemberCheck}
+                  disabled={isChecking || !checkId || !checkSurname || !checkOtherNames || !checkConsent}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isChecking ? 'Checking...' : 'Check My Status'}
+                </button>
+              </div>
             </div>
             {checkResult && (
               <div
@@ -498,7 +597,7 @@ export default function RegisterPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                     >
                       <option value="">Select County</option>
-                      {kenyaLocations.map(c => (
+                      {sortedCounties.map(c => (
                         <option key={c.name} value={c.name}>{c.name}</option>
                       ))}
                     </select>
@@ -547,19 +646,32 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Inclusive Support</h3>
 
-                {/* SIG Checkboxes */}
+                {/* SIG Checkboxes - with eligibility rules */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">Special Interest Groups (Select all that apply)</label>
                   <div className="grid grid-cols-2 gap-4">
-                    {['MARGINALIZED', 'MINORITY', 'WOMEN', 'YOUTH'].map((sig) => (
-                      <label key={sig} className="flex items-center space-x-3 cursor-pointer">
+                    {[
+                      { id: 'MARGINALIZED', label: 'Marginalized', disabled: false, reason: '' },
+                      { id: 'MINORITY', label: 'Minority', disabled: false, reason: '' },
+                      { id: 'WOMEN', label: 'Women', disabled: formData.gender === 'Male', reason: 'Available for female members only' },
+                      { id: 'YOUTH', label: 'Youth (18-35)', disabled: userAge > 35, reason: 'Available for members aged 35 and below' },
+                    ].map((sig) => (
+                      <label
+                        key={sig.id}
+                        className={`flex items-center space-x-3 ${sig.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        title={sig.disabled ? sig.reason : ''}
+                      >
                         <input
                           type="checkbox"
-                          checked={formData.sig.includes(sig)}
-                          onChange={() => handleSigChange(sig)}
-                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                          checked={formData.sig.includes(sig.id)}
+                          onChange={() => !sig.disabled && handleSigChange(sig.id)}
+                          disabled={sig.disabled}
+                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 disabled:opacity-50"
                         />
-                        <span className="text-gray-700 capitalize">{sig.toLowerCase()}</span>
+                        <span className={`text-gray-700 ${sig.disabled ? 'line-through' : ''}`}>
+                          {sig.label}
+                          {sig.disabled && <span className="text-xs text-gray-500 ml-1">({sig.reason})</span>}
+                        </span>
                       </label>
                     ))}
                   </div>

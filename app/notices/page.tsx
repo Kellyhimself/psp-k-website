@@ -29,30 +29,23 @@ export default function NoticesPage() {
   const publications = [
     {
       id: 1,
-      title: 'PSP-K Constitution (2024 Edition)',
-      date: 'January 2024',
-      type: 'Legal',
+      title: 'Party Manifesto 2025',
+      date: 'September 2025',
+      type: 'Party Document',
       format: 'PDF',
-      size: '2.4 MB',
-      link: '#',
+      size: '679 KB',
+      link: '/documents/manifesto.pdf',
+      description: 'Our vision, policies, and plans for Kenya',
     },
     {
       id: 2,
-      title: 'Audited Financial Report 2024',
-      date: 'December 2024',
-      type: 'Finance',
+      title: 'Party Ideology',
+      date: 'September 2024',
+      type: 'Party Document',
       format: 'PDF',
-      size: '1.8 MB',
-      link: '#',
-    },
-    {
-      id: 3,
-      title: 'Strategic Plan 2024-2027',
-      date: 'February 2024',
-      type: 'Strategy',
-      format: 'PDF',
-      size: '5.2 MB',
-      link: '#',
+      size: '462 KB',
+      link: '/documents/ideology.pdf',
+      description: 'Our foundational principles and beliefs',
     },
   ]
 
@@ -142,29 +135,33 @@ export default function NoticesPage() {
                     key={pub.id}
                     className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-purple-200 transition group flex items-start justify-between"
                   >
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-medium">
+                        <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded font-medium">
                           {pub.type}
                         </span>
                         <span className="text-gray-400 text-xs">{pub.date}</span>
+                        <span className="text-gray-400 text-xs">{pub.size}</span>
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">
                         {pub.title}
                       </h3>
+                      <p className="text-gray-600 text-sm mt-1">{pub.description}</p>
                     </div>
                     <a
                       href={pub.link}
-                      className="flex items-center justify-center w-10 h-10 bg-gray-50 rounded-full hover:bg-purple-50 text-gray-400 hover:text-purple-600 transition-colors shrink-0"
-                      title="Download"
+                      download
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shrink-0 ml-4"
+                      title={`Download ${pub.title}`}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                      <span className="text-sm font-medium">Download</span>
                     </a>
                   </div>
                 ))}
-                <div className="text-center p-8 bg-purple-50 rounded-xl border border-purple-100">
-                  <p className="text-purple-800 font-medium">Coming Soon</p>
-                  <p className="text-sm text-purple-600 mt-1">2025 Financial Forecasts will be uploaded shortly.</p>
+                <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-blue-800 font-medium">Looking for More Documents?</p>
+                  <p className="text-sm text-blue-600 mt-1">The Party Constitution and Election Rules are available in the <a href="/downloads" className="underline font-semibold hover:text-blue-800">Members Downloads</a> section.</p>
                 </div>
               </div>
             )}

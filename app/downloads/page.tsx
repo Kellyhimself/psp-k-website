@@ -48,30 +48,12 @@ export default function DownloadsPage() {
   const documents = [
     {
       title: 'Party Constitution',
-      description: 'PSP-K Party Constitution - Complete constitution document',
+      description: 'PSP-K Party Constitution - Complete constitution document (Members Only)',
       file: '/documents/constitution_front_page.pdf',
       fileName: 'PSP-K-Constitution.pdf',
       date: 'November 2024',
       category: 'Party Documents',
       icon: '📜',
-    },
-    {
-      title: 'Party Ideology',
-      description: 'PSP-K Ideology Document - Our foundational principles and beliefs',
-      file: '/documents/ideology.pdf',
-      fileName: 'PSP-K-Ideology.pdf',
-      date: 'September 15, 2024',
-      category: 'Party Documents',
-      icon: '📋',
-    },
-    {
-      title: 'Party Manifesto 2025',
-      description: 'PSP-K Manifesto - Our vision, policies, and plans for Kenya',
-      file: '/documents/manifesto.pdf',
-      fileName: 'PSP-K-Manifesto-2025.pdf',
-      date: 'September 15, 2025',
-      category: 'Party Documents',
-      icon: '📘',
     },
     {
       title: 'Election and Nomination Rules',
@@ -271,13 +253,16 @@ export default function DownloadsPage() {
           <div className="mt-12 bg-gray-50 rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-4 text-gray-800">About Our Documents</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              PSP-K is committed to transparency and accountability. All our official documents are
-              made available to the public to ensure that every Kenyan can understand our
-              principles, policies, and vision for the country.
+              The documents on this page are restricted to authenticated members only. This includes
+              the Party Constitution and Election/Nomination Rules.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              These documents are provided in accordance with the Political Parties Act and
-              demonstrate our commitment to democratic principles and good governance.
+              Looking for our <strong>Manifesto</strong> or <strong>Ideology</strong> documents? These are publicly
+              available on our{' '}
+              <Link href="/notices" className="text-purple-600 hover:text-purple-700 font-semibold underline">
+                Publications & Notices
+              </Link>{' '}
+              page.
             </p>
           </div>
 

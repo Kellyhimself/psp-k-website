@@ -28,8 +28,14 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     // Protected Route Protection: /admin and /downloads
+    // Exclude auth-related pages from protection
+    const isAuthPage =
+      request.nextUrl.pathname.startsWith('/admin/login') ||
+      request.nextUrl.pathname.startsWith('/admin/forgot-password') ||
+      request.nextUrl.pathname.startsWith('/admin/update-password')
+
     const isProtectedRoute =
-      (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) ||
+      (request.nextUrl.pathname.startsWith('/admin') && !isAuthPage) ||
       request.nextUrl.pathname.startsWith('/downloads')
 
     if (isProtectedRoute) {

@@ -274,7 +274,7 @@ export default function DataRequestPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                 />
               </div>
               <div>
@@ -284,7 +284,7 @@ export default function DataRequestPage() {
                   value={idNumber}
                   onChange={(e) => setIdNumber(e.target.value)}
                   placeholder="Enter your ID number"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                 />
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function DataRequestPage() {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit code"
                 maxLength={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-center text-2xl tracking-widest"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-center text-2xl tracking-widest text-gray-900 bg-white"
               />
             </div>
 
@@ -380,7 +380,7 @@ export default function DataRequestPage() {
                   onChange={(e) => setCorrectionDetails(e.target.value)}
                   rows={4}
                   placeholder="Please describe what information is incorrect and what it should be changed to..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
                   required
                 />
               </div>
@@ -395,7 +395,7 @@ export default function DataRequestPage() {
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 placeholder={requestType === 'deletion' ? 'Please explain why you want your data deleted...' : 'Any additional information...'}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
               />
             </div>
 
@@ -440,7 +440,7 @@ export default function DataRequestPage() {
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 placeholder="Help us improve - why are you leaving?"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-900 bg-white"
               />
             </div>
 

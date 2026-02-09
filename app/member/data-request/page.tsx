@@ -80,24 +80,6 @@ export default function DataRequestPage() {
             <textarea rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"></textarea>
           </div>
 
-          <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
-            <h3 className="font-semibold text-blue-900 mb-2">Proof of Request Required</h3>
-            <p className="text-sm text-blue-800 mb-4">
-              To prevent identity fraud, you must upload a signed letter or a copy of your ID card as proof of this request.
-              {requestType === 'resignation' && <strong> For resignation, a signed resignation letter is mandatory.</strong>}
-            </p>
-            <label className="block">
-              <span className="sr-only">Choose file</span>
-              <input type="file" required className="block w-full text-sm text-slate-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-100 file:text-blue-700
-                        hover:file:bg-blue-200
-                    "/>
-            </label>
-          </div>
-
           <button
             type="submit"
             disabled={isSubmitting}

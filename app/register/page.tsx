@@ -34,13 +34,16 @@ export default function RegisterPage() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
-  // Member Check Status
-  const [checkId, setCheckId] = useState('')
-  const [checkSurname, setCheckSurname] = useState('')
-  const [checkOtherNames, setCheckOtherNames] = useState('')
-  const [isChecking, setIsChecking] = useState(false)
+  // Member Check Status - OTP Based
+  const [checkEmail, setCheckEmail] = useState('')
+  const [checkIdNumber, setCheckIdNumber] = useState('')
+  const [checkOtp, setCheckOtp] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpVerified, setOtpVerified] = useState(false)
+  const [isSendingOtp, setIsSendingOtp] = useState(false)
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false)
   const [checkResult, setCheckResult] = useState<{ found: boolean; message: string } | null>(null)
-  const [checkConsent, setCheckConsent] = useState(false) // Consent for checking own status
+  const [checkError, setCheckError] = useState('')
 
   // Sorted counties list
   const sortedCounties = useMemo(() => {
@@ -139,39 +142,102 @@ export default function RegisterPage() {
     return null
   }
 
-  const handleMemberCheck = async () => {
-    if (!checkId || !checkSurname || !checkOtherNames) return
-    setIsChecking(true)
+  // Request OTP for membership check
+  const handleRequestOtp = async () => {
+    if (!checkEmail || !checkIdNumber) return
+    setIsSendingOtp(true)
+    setCheckError('')
     setCheckResult(null)
-    try {
-      const supabase = createClient()
 
-      // Use secure RPC function that verifies ID + name match
-      const { data, error } = await supabase.rpc('check_membership_status_verified', {
-        p_id_number: checkId.trim(),
-        p_surname: checkSurname.trim(),
-        p_other_names: checkOtherNames.trim()
+    try {
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: checkEmail.trim().toLowerCase(),
+          idNumber: checkIdNumber.trim(),
+          actionType: 'membership_check'
+        })
       })
 
-      if (error) throw error
+      const data = await response.json()
 
-      if (data) {
-        if (data.found && data.verified) {
-          setCheckResult({ found: true, message: 'You are already registered as a PSP-K member.' })
-        } else if (data.found && !data.verified) {
-          setCheckResult({ found: false, message: 'The name provided does not match our records for this ID. Please verify your details are correct.' })
-        } else {
-          setCheckResult({ found: false, message: 'Member Not Found. You may proceed with registration.' })
-        }
+      if (data.success) {
+        setOtpSent(true)
+        setCheckError('')
+      } else if (data.found === false) {
+        // Email/ID not found or mismatch
+        setCheckResult({ found: false, message: data.message || 'No matching record found. You may proceed with registration.' })
       } else {
-        setCheckResult({ found: false, message: 'Member Not Found. You may proceed with registration.' })
+        setCheckError(data.message || 'Failed to send verification code. Please try again.')
       }
     } catch (err) {
-      console.error('Membership check error:', err)
-      setCheckResult({ found: false, message: 'Error checking status. Please try again later.' })
+      console.error('OTP request error:', err)
+      setCheckError('Error sending verification code. Please try again later.')
     } finally {
-      setIsChecking(false)
+      setIsSendingOtp(false)
     }
+  }
+
+  // Verify OTP and check membership
+  const handleVerifyOtp = async () => {
+    if (!checkEmail || !checkOtp) return
+    setIsVerifyingOtp(true)
+    setCheckError('')
+
+    try {
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: checkEmail.trim().toLowerCase(),
+          otp: checkOtp.trim(),
+          actionType: 'membership_check'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.verified) {
+        setOtpVerified(true)
+
+        // Check verification status
+        if (data.verificationStatus === 'approved') {
+          setCheckResult({
+            found: true,
+            message: `You are a verified PSP-K member!\n\nMembership Number: ${data.membershipNumber || 'N/A'}\nMember since: ${data.registeredAt ? new Date(data.registeredAt).toLocaleDateString() : 'N/A'}`
+          })
+        } else if (data.verificationStatus === 'pending' || !data.verificationStatus) {
+          setCheckResult({
+            found: true,
+            message: `Your registration is pending verification.\n\nYour application was submitted on ${data.registeredAt ? new Date(data.registeredAt).toLocaleDateString() : 'N/A'} and is currently under review. You will receive an email once your membership is approved.`
+          })
+        } else if (data.verificationStatus === 'rejected') {
+          setCheckResult({
+            found: false,
+            message: `Your previous application was not approved. Please contact us at info@psp-kenya.com for more information, or you may submit a new registration.`
+          })
+        }
+      } else {
+        setCheckError(data.message || 'Invalid or expired verification code. Please try again.')
+      }
+    } catch (err) {
+      console.error('OTP verification error:', err)
+      setCheckError('Error verifying code. Please try again later.')
+    } finally {
+      setIsVerifyingOtp(false)
+    }
+  }
+
+  // Reset membership check form
+  const resetMemberCheck = () => {
+    setCheckEmail('')
+    setCheckIdNumber('')
+    setCheckOtp('')
+    setOtpSent(false)
+    setOtpVerified(false)
+    setCheckResult(null)
+    setCheckError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,16 +257,30 @@ export default function RegisterPage() {
     try {
       const supabase = createClient()
 
-      // Check for duplicate registration by ID number
-      const { data: existing } = await supabase
+      // Check for duplicate registration by ID number (use maybeSingle to avoid errors when not found)
+      const { data: existingId } = await supabase
         .from('registrations')
         .select('id')
         .eq('id_number', formData.idNumber)
-        .single()
+        .maybeSingle()
 
-      if (existing) {
+      if (existingId) {
         setSubmitStatus('error')
-        setErrorMessage('This Identity Number is already registered.')
+        setErrorMessage('This Identity Number is already registered. If you have already registered, please use the membership status check above.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Check for duplicate registration by email
+      const { data: existingEmail } = await supabase
+        .from('registrations')
+        .select('id')
+        .eq('email', formData.email.trim().toLowerCase())
+        .maybeSingle()
+
+      if (existingEmail) {
+        setSubmitStatus('error')
+        setErrorMessage('This email address is already registered. If you have already registered, please use the membership status check above.')
         setIsSubmitting(false)
         return
       }
@@ -211,7 +291,7 @@ export default function RegisterPage() {
           first_name: formData.firstName, // Other Names (required by DB)
           last_name: formData.lastName,   // Surname
           other_names: formData.firstName, // Other Names (first + middle names)
-          email: formData.email,
+          email: formData.email.trim().toLowerCase(),
           phone: formData.phone,
           identity_type: formData.identityType,
           id_number: formData.idNumber,
@@ -228,13 +308,23 @@ export default function RegisterPage() {
           not_member_of_other_party: formData.notMemberOfOtherParty,
           consent_to_data_processing: formData.consentToDataProcessing,
           consent_to_image_use: formData.consentToImageUse,
+          verification_status: 'pending',
         },
       ])
 
       if (error) {
         console.error('Registration error:', error)
         setSubmitStatus('error')
-        setErrorMessage(error.message || 'There was an error submitting your registration.')
+
+        // Handle specific database constraint errors with user-friendly messages
+        const errorMessage = error.message || ''
+        if (errorMessage.includes('registrations_id_number_key') || errorMessage.includes('duplicate') && errorMessage.includes('id_number')) {
+          setErrorMessage('This Identity Number is already registered. If you have already registered, please use the membership status check above.')
+        } else if (errorMessage.includes('registrations_email_key') || errorMessage.includes('duplicate') && errorMessage.includes('email')) {
+          setErrorMessage('This email address is already registered. If you have already registered, please use the membership status check above.')
+        } else {
+          setErrorMessage(error.message || 'There was an error submitting your registration.')
+        }
       } else {
         // Send email notification (Existing logic)
         try {
@@ -349,67 +439,179 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* QUICK CHECK SECTION - WITH CONSENT AND NAME VERIFICATION */}
+          {/* QUICK CHECK SECTION - OTP BASED VERIFICATION */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-10 shadow-sm">
             <h3 className="text-lg font-bold text-blue-900 mb-2">Already a Member? Check Your Status</h3>
             <p className="text-sm text-blue-700 mb-4">
-              Enter your full name and ID/Passport number below to verify your membership status.
+              Enter your registered email and ID number. We will send a verification code to confirm your identity.
             </p>
-            <div className="space-y-4">
-              <label className="flex items-start space-x-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checkConsent}
-                  onChange={(e) => setCheckConsent(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-blue-800">
-                  I confirm that I am checking my own membership status and the details I am entering belong to me.
-                </span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={checkSurname}
-                  onChange={(e) => setCheckSurname(e.target.value)}
-                  placeholder="Your Surname"
-                  disabled={!checkConsent}
-                  className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-                <input
-                  type="text"
-                  value={checkOtherNames}
-                  onChange={(e) => setCheckOtherNames(e.target.value)}
-                  placeholder="Your Other Names"
-                  disabled={!checkConsent}
-                  className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <input
-                  type="text"
-                  value={checkId}
-                  onChange={(e) => setCheckId(e.target.value)}
-                  placeholder="Your ID/Passport Number"
-                  disabled={!checkConsent}
-                  className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
+
+            {!otpSent && !checkResult ? (
+              /* Step 1: Enter Email and ID */
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input
+                    type="email"
+                    value={checkEmail}
+                    onChange={(e) => setCheckEmail(e.target.value)}
+                    placeholder="Your registered email"
+                    className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500"
+                  />
+                  <input
+                    type="text"
+                    value={checkIdNumber}
+                    onChange={(e) => setCheckIdNumber(e.target.value)}
+                    placeholder="Your ID/Passport number"
+                    className="px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500"
+                  />
+                </div>
                 <button
-                  onClick={handleMemberCheck}
-                  disabled={isChecking || !checkId || !checkSurname || !checkOtherNames || !checkConsent}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleRequestOtp}
+                  disabled={isSendingOtp || !checkEmail || !checkIdNumber}
+                  className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isChecking ? 'Checking...' : 'Check My Status'}
+                  {isSendingOtp ? 'Sending...' : 'Send Verification Code'}
                 </button>
+                {checkError && (
+                  <p className="text-sm text-red-600">{checkError}</p>
+                )}
               </div>
-            </div>
+            ) : otpSent && !otpVerified ? (
+              /* Step 2: Enter OTP */
+              <div className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-green-800">
+                    A verification code has been sent to <strong>{checkEmail}</strong>. Please check your inbox and enter the code below.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <input
+                    type="text"
+                    value={checkOtp}
+                    onChange={(e) => setCheckOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                    className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white placeholder:text-gray-500 text-center text-xl tracking-widest"
+                  />
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={isVerifyingOtp || checkOtp.length !== 6}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isVerifyingOtp ? 'Verifying...' : 'Verify Code'}
+                  </button>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <button
+                    onClick={resetMemberCheck}
+                    className="text-blue-600 hover:underline"
+                  >
+                    Use a different email
+                  </button>
+                  <button
+                    onClick={handleRequestOtp}
+                    disabled={isSendingOtp}
+                    className="text-blue-600 hover:underline disabled:opacity-50"
+                  >
+                    Resend code
+                  </button>
+                </div>
+                {checkError && (
+                  <p className="text-sm text-red-600">{checkError}</p>
+                )}
+              </div>
+            ) : null}
+
+            {/* Result display */}
             {checkResult && (
-              <div
-                role="status"
-                aria-live="polite"
-                className={`mt-4 p-3 rounded-lg ${checkResult.found ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
-              >
-                <strong>{checkResult.message}</strong>
+              <div className="space-y-4">
+                {/* Approved Member - Green */}
+                {checkResult.found && checkResult.message.includes('verified PSP-K member') && (
+                  <div role="status" aria-live="polite" className="bg-green-50 border border-green-200 rounded-lg p-5">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="text-green-800 font-bold">Verified Member</h4>
+                        <p className="text-green-700 text-sm mt-1 whitespace-pre-line">{checkResult.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pending Status - Amber */}
+                {checkResult.found && checkResult.message.includes('pending verification') && (
+                  <div role="status" aria-live="polite" className="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="text-amber-800 font-bold">Registration Pending</h4>
+                        <p className="text-amber-700 text-sm mt-1 whitespace-pre-line">{checkResult.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejected - Red/Gray */}
+                {!checkResult.found && checkResult.message.includes('not approved') && (
+                  <div role="status" aria-live="polite" className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="text-gray-800 font-bold">Application Status</h4>
+                        <p className="text-gray-700 text-sm mt-1 whitespace-pre-line">{checkResult.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Not Found - Guide to Register */}
+                {!checkResult.found && !checkResult.message.includes('not approved') && (
+                  <div role="status" aria-live="polite" className="bg-blue-50 border border-blue-200 rounded-lg p-5">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="text-blue-800 font-bold">No Membership Record Found</h4>
+                        <p className="text-blue-700 text-sm mt-2">
+                          We couldn't find a membership record matching those details.
+                        </p>
+                        <div className="mt-3 space-y-2 text-sm text-blue-700">
+                          <p className="flex items-start">
+                            <span className="font-semibold mr-2">New to PSP-K?</span>
+                            Please scroll down and complete the registration form to become a member.
+                          </p>
+                          <p className="flex items-start">
+                            <span className="font-semibold mr-2">Already registered?</span>
+                            Double-check your email address and ID/Passport number are entered correctly.
+                          </p>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={resetMemberCheck}
+                  className="text-blue-600 hover:underline text-sm"
+                >
+                  Check another email
+                </button>
               </div>
             )}
           </div>
@@ -747,13 +949,41 @@ export default function RegisterPage() {
                 <div
                   role="status"
                   aria-live="polite"
-                  className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center"
+                  className="bg-amber-50 border-2 border-amber-400 rounded-xl p-6 text-center"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                  <div>
-                    <strong className="font-bold block">Application Successful!</strong>
-                    <span>Welcome to PSP-K. Your details have been submitted for verification.</span>
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                   </div>
+                  <h3 className="text-xl font-bold text-amber-800 mb-2">Registration Submitted Successfully</h3>
+                  <p className="text-amber-700 mb-4">
+                    Your membership application is now <strong>pending verification</strong>.
+                  </p>
+                  <div className="bg-white rounded-lg p-4 text-left text-sm text-gray-700 space-y-2">
+                    <p className="flex items-start">
+                      <svg className="w-5 h-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                      </svg>
+                      <span>Our team will review your application within <strong>7-14 working days</strong>.</span>
+                    </p>
+                    <p className="flex items-start">
+                      <svg className="w-5 h-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                      </svg>
+                      <span>You will receive an email notification once your membership is approved.</span>
+                    </p>
+                    <p className="flex items-start">
+                      <svg className="w-5 h-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd"/>
+                      </svg>
+                      <span>Upon approval, you will receive your unique <strong>PSP-K Membership Number</strong>.</span>
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-4">
+                    Questions? Contact us at <a href="mailto:info@psp-kenya.com" className="text-purple-600 hover:underline">info@psp-kenya.com</a>
+                  </p>
                 </div>
               )}
 

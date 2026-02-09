@@ -547,5 +547,5 @@ export const religions = [
 ];
 
 export const ethnicities = [
-    "Kikuyu", "Luhya", "Kalenjin", "Luo", "Kamba", "Somali", "Kisii", "Mijikenda", "Meru", "Turkana", "Maasai", "Teso", "Embu", "Taita", "Kurir", "Other"
+    "Kikuyu", "Luhya", "Kalenjin", "Luo", "Kamba", "Somali", "Kisii", "Mijikenda", "Meru", "Turkana", "Maasai", "Teso", "Embu", "Taita", "Kuria", "Other"
 ].sort();

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import ImageUpload from '@/components/ImageUpload'
+import VideoUpload from '@/components/VideoUpload'
 
 export default function EditPostPage() {
   const params = useParams()
@@ -15,6 +16,7 @@ export default function EditPostPage() {
     excerpt: '',
     content: '',
     image_url: '',
+    video_url: '',
     link_url: '',
     is_featured: true,
     is_published: false,
@@ -63,6 +65,7 @@ export default function EditPostPage() {
         excerpt: data.excerpt || '',
         content: data.content || '',
         image_url: data.image_url || '',
+        video_url: data.video_url || '',
         link_url: data.link_url || '',
         is_featured: data.is_featured ?? true,
         is_published: data.is_published ?? false,
@@ -137,7 +140,7 @@ export default function EditPostPage() {
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -150,7 +153,7 @@ export default function EditPostPage() {
               rows={2}
               value={formData.excerpt}
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -163,7 +166,7 @@ export default function EditPostPage() {
               rows={6}
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -178,6 +181,17 @@ export default function EditPostPage() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Video (Optional)
+            </label>
+            <p className="text-xs text-gray-500 mb-2">Upload from your device or paste a YouTube / Vimeo URL</p>
+            <VideoUpload
+              onUploadComplete={(url) => setFormData({ ...formData, video_url: url })}
+              currentVideoUrl={formData.video_url}
+            />
+          </div>
+
+          <div>
             <label htmlFor="link_url" className="block text-sm font-medium text-gray-700 mb-2">
               Link URL (Optional)
             </label>
@@ -187,7 +201,7 @@ export default function EditPostPage() {
               value={formData.link_url}
               onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
               placeholder="/about or https://example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
 
@@ -203,7 +217,7 @@ export default function EditPostPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 

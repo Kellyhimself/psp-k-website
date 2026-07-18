@@ -1,11 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 // Create admin Supabase client for server-side operations
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+type AdminRole = 'content_admin' | 'super_admin' | null
+
+async function getAdminRole(): Promise<AdminRole> {
+  try {
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: profile } = await supabaseAdmin
+      .from('admin_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    // No profile = original unconfigured admin, grant super_admin
+    return (profile?.role ?? 'super_admin') as AdminRole
+  } catch {
+    return null
+  }
+}
 
 // Generate membership number (PSP-K-YYYY-XXXXX format)
 async function generateMembershipNumber(): Promise<string> {
@@ -32,6 +54,14 @@ async function generateMembershipNumber(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
+    const role = await getAdminRole()
+    if (!role) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const { memberId, action, reason } = body
 
@@ -47,6 +77,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, message: 'Invalid action' },
         { status: 400 }
+      )
+    }
+
+    // Reject is restricted to super_admin; approve is open to all admins
+    if (action === 'reject' && role !== 'super_admin') {
+      return NextResponse.json(
+        { success: false, message: 'Forbidden: only Super Admins can reject applications' },
+        { status: 403 }
       )
     }
 

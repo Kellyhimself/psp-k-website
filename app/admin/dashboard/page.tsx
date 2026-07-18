@@ -49,8 +49,17 @@ interface RegisteredUser {
 
 import SecuritySettings from '@/components/admin/SecuritySettings'
 
-type TabType = 'posts' | 'users' | 'settings'
+type TabType = 'posts' | 'users' | 'admins' | 'settings'
 type UserFilter = 'all' | 'pending' | 'approved' | 'rejected'
+
+interface AdminProfile {
+  id: string
+  user_id: string
+  email: string
+  display_name: string | null
+  role: 'content_admin' | 'super_admin'
+  created_at: string
+}
 
 export default function AdminDashboard() {
   const [posts, setPosts] = useState<FeaturedPost[]>([])
@@ -67,6 +76,14 @@ export default function AdminDashboard() {
   const [selectedMember, setSelectedMember] = useState<RegisteredUser | null>(null)
   const [rejectInDetail, setRejectInDetail] = useState(false)
   const [rejectReasonDetail, setRejectReasonDetail] = useState('')
+  const [adminRole, setAdminRole] = useState<'content_admin' | 'super_admin' | null>(null)
+  const [adminUnconfigured, setAdminUnconfigured] = useState(false)
+  const [adminsList, setAdminsList] = useState<AdminProfile[]>([])
+  const [isLoadingAdmins, setIsLoadingAdmins] = useState(false)
+  const [showAddAdminForm, setShowAddAdminForm] = useState(false)
+  const [newAdminForm, setNewAdminForm] = useState({ email: '', displayName: '', role: 'content_admin', password: '' })
+  const [adminFormError, setAdminFormError] = useState('')
+  const [adminFormLoading, setAdminFormLoading] = useState(false)
   const router = useRouter()
 
   async function checkAuth() {
@@ -90,6 +107,19 @@ export default function AdminDashboard() {
     }
 
     setUser(user)
+
+    const { data: profile } = await supabase
+      .from('admin_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (!profile) {
+      setAdminRole('super_admin')
+      setAdminUnconfigured(true)
+    } else {
+      setAdminRole(profile.role as 'content_admin' | 'super_admin')
+    }
   }
 
   async function fetchPosts() {
@@ -153,6 +183,10 @@ export default function AdminDashboard() {
       fetchUsers()
     }
   }, [activeTab, users.length])
+
+  useEffect(() => {
+    if (activeTab === 'admins') fetchAdmins()
+  }, [activeTab])
 
   // Filter users based on selected filter
   const filteredUsers = users.filter(u => {
@@ -330,6 +364,78 @@ export default function AdminDashboard() {
     }
   }
 
+  async function fetchAdmins() {
+    setIsLoadingAdmins(true)
+    try {
+      const response = await fetch('/api/admin/manage-admins')
+      const data = await response.json()
+      if (data.success) setAdminsList(data.admins)
+    } catch {
+      console.error('Error fetching admins')
+    } finally {
+      setIsLoadingAdmins(false)
+    }
+  }
+
+  async function handleUpdateRole(userId: string, newRole: string) {
+    try {
+      const response = await fetch('/api/admin/manage-admins', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: newRole }),
+      })
+      const data = await response.json()
+      if (data.success) fetchAdmins()
+      else alert('Error: ' + data.message)
+    } catch {
+      alert('Error updating role')
+    }
+  }
+
+  async function handleRemoveAdmin(userId: string) {
+    if (!confirm('Remove this admin? They will no longer be able to log in.')) return
+    try {
+      const response = await fetch('/api/admin/manage-admins', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await response.json()
+      if (data.success) fetchAdmins()
+      else alert('Error: ' + data.message)
+    } catch {
+      alert('Error removing admin')
+    }
+  }
+
+  async function handleAddAdmin() {
+    if (!newAdminForm.email || !newAdminForm.password) {
+      setAdminFormError('Email and password are required')
+      return
+    }
+    setAdminFormLoading(true)
+    setAdminFormError('')
+    try {
+      const response = await fetch('/api/admin/manage-admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAdminForm),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setShowAddAdminForm(false)
+        setNewAdminForm({ email: '', displayName: '', role: 'content_admin', password: '' })
+        fetchAdmins()
+      } else {
+        setAdminFormError(data.message || 'Error creating admin')
+      }
+    } catch {
+      setAdminFormError('An unexpected error occurred')
+    } finally {
+      setAdminFormLoading(false)
+    }
+  }
+
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -348,13 +454,37 @@ export default function AdminDashboard() {
     )
   }
 
+  const isSuperAdmin = adminRole === 'super_admin'
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
+
+        {adminUnconfigured && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-300 rounded-lg px-5 py-3 flex items-start gap-3">
+            <svg className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+            </svg>
+            <div className="text-sm">
+              <p className="font-semibold text-yellow-800">Admin roles not configured yet</p>
+              <p className="text-yellow-700 mt-0.5">
+                You have temporary Super Admin access. Go to the <button onClick={() => setActiveTab('admins')} className="underline font-medium">Admins tab</button> to set up role-based access for your team.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage posts, members, and content</p>
+            <p className="text-gray-600 mt-1">
+              Manage posts, members, and content
+              {adminRole && (
+                <span className={`ml-3 px-2 py-0.5 text-xs font-semibold rounded-full ${isSuperAdmin ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                  {isSuperAdmin ? 'Super Admin' : 'Content Admin'}
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex gap-4">
             {activeTab === 'posts' && (
@@ -400,6 +530,17 @@ export default function AdminDashboard() {
                 </span>
               )}
             </button>
+            {isSuperAdmin && (
+              <button
+                onClick={() => setActiveTab('admins')}
+                className={`${activeTab === 'admins'
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition`}
+              >
+                Admins ({adminsList.length || '...'})
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('settings')}
               className={`${activeTab === 'settings'
@@ -464,7 +605,9 @@ export default function AdminDashboard() {
                               {post.is_published ? 'Unpublish' : 'Publish'}
                             </button>
                             <Link href={`/admin/posts/${post.id}/edit`} className="text-blue-600 hover:text-blue-900">Edit</Link>
-                            <button onClick={() => handleDelete(post.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                            {isSuperAdmin && (
+                              <button onClick={() => handleDelete(post.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -627,13 +770,15 @@ export default function AdminDashboard() {
                                       >
                                         {processingId === member.id ? 'Processing...' : 'Approve'}
                                       </button>
-                                      <button
-                                        onClick={() => setShowRejectModal(member.id)}
-                                        disabled={processingId === member.id}
-                                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                                      >
-                                        Reject
-                                      </button>
+                                      {isSuperAdmin && (
+                                        <button
+                                          onClick={() => setShowRejectModal(member.id)}
+                                          disabled={processingId === member.id}
+                                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                                        >
+                                          Reject
+                                        </button>
+                                      )}
                                     </>
                                   )}
                                   {member.verification_status === 'approved' && (
@@ -653,6 +798,153 @@ export default function AdminDashboard() {
               </>
             )}
           </>
+        )}
+
+        {/* Admins Tab */}
+        {activeTab === 'admins' && isSuperAdmin && (
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Admin Users</h2>
+                <p className="text-sm text-gray-500 mt-1">Manage who can access this dashboard and what they can do.</p>
+              </div>
+              <button
+                onClick={() => setShowAddAdminForm(v => !v)}
+                className="bg-purple-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition"
+              >
+                {showAddAdminForm ? 'Cancel' : '+ Add Admin'}
+              </button>
+            </div>
+
+            {/* Role Legend */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 font-semibold rounded-full text-xs">Super Admin</span>
+                <p className="text-gray-600 mt-1">Full access — approve/reject members, delete posts, manage documents, manage admins.</p>
+              </div>
+              <div>
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 font-semibold rounded-full text-xs">Content Admin</span>
+                <p className="text-gray-600 mt-1">View members, view documents, write posts. Cannot approve members or delete anything.</p>
+              </div>
+            </div>
+
+            {/* Add Admin Form */}
+            {showAddAdminForm && (
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
+                <h3 className="font-semibold text-gray-900">New Admin</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Email *</label>
+                    <input
+                      type="email"
+                      value={newAdminForm.email}
+                      onChange={e => setNewAdminForm(f => ({ ...f, email: e.target.value }))}
+                      placeholder="admin@psp-kenya.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Display Name</label>
+                    <input
+                      type="text"
+                      value={newAdminForm.displayName}
+                      onChange={e => setNewAdminForm(f => ({ ...f, displayName: e.target.value }))}
+                      placeholder="e.g. Jane Mwangi"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Temporary Password *</label>
+                    <input
+                      type="password"
+                      value={newAdminForm.password}
+                      onChange={e => setNewAdminForm(f => ({ ...f, password: e.target.value }))}
+                      placeholder="Min. 8 characters"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Role *</label>
+                    <select
+                      value={newAdminForm.role}
+                      onChange={e => setNewAdminForm(f => ({ ...f, role: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="content_admin">Content Admin</option>
+                      <option value="super_admin">Super Admin</option>
+                    </select>
+                  </div>
+                </div>
+                {adminFormError && (
+                  <p className="text-sm text-red-600">{adminFormError}</p>
+                )}
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAddAdmin}
+                    disabled={adminFormLoading}
+                    className="bg-purple-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {adminFormLoading ? 'Creating...' : 'Create Admin'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Admins List */}
+            {isLoadingAdmins ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+              </div>
+            ) : adminsList.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500 text-sm">
+                No admin profiles configured yet. Click <strong>+ Add Admin</strong> to get started.
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Added</th>
+                      <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {adminsList.map(admin => (
+                      <tr key={admin.id} className="hover:bg-gray-50">
+                        <td className="px-5 py-4">
+                          <p className="text-sm font-medium text-gray-900">{admin.display_name || '—'}</p>
+                          <p className="text-xs text-gray-500">{admin.email}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <select
+                            value={admin.role}
+                            onChange={e => handleUpdateRole(admin.user_id, e.target.value)}
+                            className={`text-xs font-semibold rounded-full px-2 py-1 border-0 cursor-pointer focus:ring-2 focus:ring-purple-500 ${admin.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}
+                          >
+                            <option value="content_admin">Content Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                          </select>
+                        </td>
+                        <td className="px-5 py-4 text-xs text-gray-500">
+                          {new Date(admin.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <button
+                            onClick={() => handleRemoveAdmin(admin.user_id)}
+                            className="text-xs text-red-500 hover:text-red-700"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Settings Tab */}
@@ -914,13 +1206,15 @@ export default function AdminDashboard() {
               </button>
               {(!selectedMember.verification_status || selectedMember.verification_status === 'pending') && !rejectInDetail && (
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setRejectInDetail(true)}
-                    disabled={processingId === selectedMember.id}
-                    className="px-5 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50"
-                  >
-                    Reject
-                  </button>
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => setRejectInDetail(true)}
+                      disabled={processingId === selectedMember.id}
+                      className="px-5 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                    >
+                      Reject
+                    </button>
+                  )}
                   <button
                     onClick={handleApproveFromDetail}
                     disabled={processingId === selectedMember.id}

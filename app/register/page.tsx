@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -622,19 +622,37 @@ export default function RegisterPage() {
             {/* Keeps existing USSD/ORPP Content */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="font-bold text-lg text-purple-800 mb-3">Option A: Using USSD *509#</h3>
-                <ol className="list-decimal pl-5 space-y-2 text-gray-700 text-sm">
+                <h3 className="font-bold text-lg text-purple-800 mb-1">Option A: Using USSD *509#</h3>
+                <p className="text-xs text-gray-500 mb-3">You must create a *509# account before you can resign or join a party.</p>
+
+                {/* Account setup */}
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">First Time? Create Your Account</p>
+                <ol className="list-decimal pl-5 space-y-1.5 text-gray-700 text-sm mb-4">
                   <li>Dial <strong>*509#</strong>.</li>
-                  <li><strong>First Time?</strong> Enter ID & First Name to receive PIN.</li>
-                  <li>Enter PIN and select <strong>“Membership”</strong>.</li>
-                  <li>Select <strong>“Resign”</strong> to leave current party.</li>
+                  <li>Enter your <strong>First Name</strong>.</li>
+                  <li>Select identity type: <strong>National ID</strong> or <strong>Passport</strong>.</li>
+                  <li>Enter your <strong>ID / Passport Number</strong>.</li>
+                  <li>Set a <strong>4-digit PIN</strong>.</li>
+                  <li>Confirm your PIN, then <strong>re-dial *509#</strong> to continue.</li>
+                </ol>
+
+                {/* Resign steps */}
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Now Resign From Your Current Party</p>
+                <ol className="list-decimal pl-5 space-y-1.5 text-gray-700 text-sm">
+                  <li>Dial <strong>*509#</strong> and enter your PIN.</li>
+                  <li>Select <strong>Membership</strong>.</li>
+                  <li>Select <strong>Resign</strong> and follow the prompts.</li>
+                  <li className="text-purple-700">
+                    <strong>Tip:</strong> Enter <strong>99</strong> at any menu to see more options.
+                  </li>
                 </ol>
               </div>
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="font-bold text-lg text-blue-800 mb-3">Option B: Online via ORPP Portal</h3>
                 <ol className="list-decimal pl-5 space-y-2 text-gray-700 text-sm">
                   <li>Visit <a href="https://ippms.orpp.or.ke" target="_blank" className="text-blue-600 hover:underline">ippms.orpp.or.ke</a>.</li>
-                  <li>Navigate to <strong>“Membership Resignation”</strong>.</li>
+                  <li>Log in or register an account (eCitizen credentials accepted).</li>
+                  <li>Navigate to <strong>Membership Resignation</strong> and complete the process.</li>
                 </ol>
               </div>
             </div>
@@ -642,20 +660,50 @@ export default function RegisterPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6 border-t pt-6">Step 2: Register as a Member (3 Options)</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
-                <h3 className="font-bold text-lg text-purple-900 mb-3">Option A: Using USSD *509#</h3>
-                <ol className="list-decimal pl-5 space-y-2 text-purple-900 text-sm">
-                  <li>Dial <strong>*509#</strong> and Enter PIN.</li>
-                  <li>Select <strong>“Membership”</strong> {'>'} <strong>“Join a party”</strong>.</li>
-                  <li>Follow prompts to select your <strong>County</strong>, <strong>Constituency</strong>, and <strong>Ward</strong>.</li>
-                  <li>Enter Party Code: <strong>000</strong>.</li>
+                <h3 className="font-bold text-lg text-purple-900 mb-1">Option A: Using USSD *509#</h3>
+                <p className="text-xs text-purple-700 mb-3">You must have a *509# account before joining a party. If you have not created one yet, follow the account setup steps in Step 1 above first.</p>
+
+                {/* Join steps */}
+                <p className="text-xs font-bold text-purple-800 uppercase tracking-wide mb-1">Join PSP-K</p>
+                <ol className="list-decimal pl-5 space-y-1.5 text-purple-900 text-sm">
+                  <li>Dial <strong>*509#</strong> and enter your PIN.</li>
+                  <li>Select <strong>Membership</strong>, then <strong>Join a party</strong>.</li>
+                  <li>Follow the prompts to select your <strong>County</strong>, <strong>Constituency</strong>, and <strong>Ward</strong>.</li>
+                  <li>Enter Party Code: <strong>890</strong>.</li>
                   <li>Confirm joining <strong>People Salvation Party of Kenya (PSP)</strong>.</li>
+                  <li className="text-purple-700">
+                    <strong>Tip:</strong> Enter <strong>99</strong> at any menu step to see more options.
+                  </li>
                 </ol>
               </div>
               <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
                 <h3 className="font-bold text-lg text-blue-900 mb-3">Option B: Online via ORPP Portal</h3>
-                <ol className="list-decimal pl-5 space-y-2 text-blue-900 text-sm">
-                  <li>Log in to <a href="https://ippms.orpp.or.ke" target="_blank" className="underline">ippms.orpp.or.ke</a>.</li>
-                  <li>Select <strong>“People Salvation Party of Kenya (PSP-K)”</strong>.</li>
+                <ol className="list-decimal pl-5 space-y-3 text-blue-900 text-sm">
+                  <li>
+                    Visit{' '}
+                    <a href="https://ippms.orpp.or.ke" target="_blank" rel="noopener noreferrer" className="underline font-semibold">
+                      ippms.orpp.or.ke
+                    </a>.
+                  </li>
+                  <li>
+                    <strong>Log in</strong> if you already have an account. If you do not have an account, click{' '}
+                    <strong>Register</strong> to create one.
+                    <span className="text-blue-700 mt-1 block">
+                      You can also sign in using your <strong>eCitizen</strong> credentials if you have an eCitizen account.
+                    </span>
+                  </li>
+                  <li>
+                    After logging in, navigate to <strong>My Account</strong>.
+                  </li>
+                  <li>
+                    Click on <strong>Membership Registration</strong>.
+                  </li>
+                  <li>
+                    From the party list, select <strong>People Salvation Party of Kenya (PSP)</strong>.
+                  </li>
+                  <li>
+                    Fill in the remaining required details and submit your registration.
+                  </li>
                 </ol>
               </div>
             </div>
@@ -664,7 +712,28 @@ export default function RegisterPage() {
 
           {/* Option C: Direct Form */}
           <div id="online-form" className="bg-white rounded-xl shadow-lg p-8 md:p-10 space-y-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 text-center border-b pb-4">Option C: Direct Website Registration</h2>
+            <div className="text-center border-b pb-4">
+              <h2 className="text-2xl font-bold text-gray-800">Option C: Direct Website Registration</h2>
+            </div>
+
+            {/* ORPP SMS Consent Notice */}
+            <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 flex gap-3">
+              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <div className="text-sm text-amber-800">
+                <p className="font-semibold mb-1">ORPP SMS Consent &mdash; Action Required After Submission</p>
+                <p>
+                  After submitting this form, ORPP (Office of the Registrar of Political Parties) will send you an{' '}
+                  <strong>SMS to your registered phone number</strong> requesting consent to process your membership.
+                </p>
+                <p className="mt-1">
+                  <strong>Please accept the consent</strong> only if the message shows party code{' '}
+                  <strong className="text-amber-900">890</strong> &mdash; that is PSP-K&apos;s official ORPP party code.
+                  Do not accept if a different party code appears.
+                </p>
+              </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
 
